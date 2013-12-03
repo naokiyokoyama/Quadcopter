@@ -1,12 +1,8 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303.h>
 #include <Wire.h>
-#include <Kalman.h>
 #include <PID_v1.h>
 #include <Servo.h>
-
-Kalman kalmanX; 
-Kalman kalmanY;
 
 // Assign a unique ID to the Adafruit sensors
 Adafruit_LSM303_Accel accel = Adafruit_LSM303_Accel(54321);
@@ -22,10 +18,10 @@ unsigned int LoopTime;
 // ESC ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 boolean STOP;
 
-Servo NorthMotor; // Northwest
-Servo WestMotor; // Southwest
-Servo SouthMotor; // Southeast
-Servo EastMotor; // Northeast
+Servo North; // Northwest
+Servo West; // Southwest
+Servo South; // Southeast
+Servo East; // Northeast
 
 const int ESCMin = 10; // Minimum pulse that will be sent to the ESC
 
@@ -115,10 +111,10 @@ void ESCFunctions() {
     triggerSTOP();
   }
   else {
-    NorthMotor.write(ESCMin);
-    WestMotor.write(ESCMin);
-    SouthMotor.write(ESCMin);
-    EastMotor.write(ESCMin);
+    North.write(ESCMin);
+    West.write(ESCMin);
+    South.write(ESCMin);
+    East.write(ESCMin);
     while(1 == 1) {}
   }
 }

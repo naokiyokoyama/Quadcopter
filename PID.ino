@@ -39,10 +39,10 @@ void computePIDS() {
 
 void Hover() {
   computePIDS();
-  NorthMotor.write(HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2);
+  North.write(HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2);
   //Sw.write(HoverThrottle + WEComplement + (MaxWave - HoverThrottle) / 2);
-  WestMotor.write(10);
-  SouthMotor.write(HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2);
+  West.write(10);
+  South.write(HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2);
   //Ne.write(HoverThrottle - WEComplement + (MaxWave - HoverThrottle) / 2);
-  EastMotor.write(10);
+  East.write(10);
 }

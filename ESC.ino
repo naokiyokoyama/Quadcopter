@@ -7,21 +7,21 @@ boolean StopBegun = false;                   // Indicates whether the pivot sequ
 int lastPivot;                               // Contains the last zdps value of the sequence while it still exists
 
 void setupMotors() {
-  NorthMotor.attach(7);
-  WestMotor.attach(6);
-  SouthMotor.attach(5);
-  EastMotor.attach(4);
-  NorthMotor.write(ESCMin);
-  WestMotor.write(ESCMin);
-  SouthMotor.write(ESCMin);
-  EastMotor.write(ESCMin);
+  North.attach(7);
+  West.attach(6);
+  South.attach(5);
+  East.attach(4);
+  North.write(ESCMin);
+  West.write(ESCMin);
+  South.write(ESCMin);
+  East.write(ESCMin);
 }
 
 void testSimple() {
-  NorthMotor.write(100);
-  WestMotor.write(100);
-  SouthMotor.write(100);
-  EastMotor.write(100);
+  North.write(100);
+  West.write(100);
+  South.write(100);
+  East.write(100);
 }
 
 void triggerSTOP() {
