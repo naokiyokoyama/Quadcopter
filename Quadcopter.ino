@@ -83,7 +83,7 @@ void setup() {
   MicrosTracker = micros();
 }
 
-float ggx, ggy, ggz;//
+float ggx, ggy, ggz;
 
 void loop() {  
   //LoopTracker = millis();
