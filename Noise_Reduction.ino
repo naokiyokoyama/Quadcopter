@@ -69,7 +69,7 @@ void reduceGyroNoise() {
   {zRm2 = (zRm + zRm1) / 2; Reduced++;}
 }
 
-void TransformGyroDPS() {
+void transformGyroDPS() {
   int holder = xdps;
   ydps = xdps/sqrt(2) - ydps/sqrt(2);
   xdps = -1 * (holder/sqrt(2) + ydps/sqrt(2));  
@@ -96,7 +96,6 @@ void getGyroDPS2() {
   }
   else
   {zdps = 0;}
-  TransformGyroDPS();
 }
 
 void logMicrosPassed() {

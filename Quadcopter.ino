@@ -79,23 +79,19 @@ void setup() {
   MicrosTracker = micros();
 }
 
-float ggx, ggy, ggz;
-
 void loop() {  
   //LoopTracker = millis();
   
-  receiveTransmitterSignals();
+  receiveTransmitterSignals();              // Uses the volatile interupt values to read each joystick (-500 ~ 500)
   logGyroNoise();                           // Shifts xRm/yRm/zRm logs one place towards the past
   getGyroValues();                          // Computes Rm for each axis
-  ggx = (float)xRm * SC;
-  ggy = (float)yRm * SC;
-  ggz = (float)zRm * SC;
   getAccelValues();                         // Computes acceleration in each axis  
-  MicrosPassed = micros() - MicrosTracker;  // Computes time taken for loop 
+  MicrosPassed = micros() - MicrosTracker;  // Computes time taken for each loop 
   MicrosTracker = micros();                 
   logMicrosPassed();                        // Shifts all MicrosPassed values one place towards the past
   reduceGyroNoise();                        // Filters radical noise from Rm to Rm2
   getGyroDPS2();                            // Filtered-byte-to-DPS conversion with Rm2, ambient noise filtering
+  transformGyroDPS();
   //getKalmanAngles();
   ComplementaryFilter();
   

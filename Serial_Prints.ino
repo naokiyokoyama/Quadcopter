@@ -9,12 +9,6 @@ void printValues() {
   }
 }
 
-void RawRms() {
-  Serial.print(" Raw xdps:"); Serial.print(ggx);
-  Serial.print(" Raw ydps:"); Serial.print(ggy);
-  Serial.print(" Raw zdps:"); Serial.print(ggz);
-}
-
 void MilliLoopTime() {
   Serial.print(" LoopTime:"); Serial.print(LoopTime);
 }

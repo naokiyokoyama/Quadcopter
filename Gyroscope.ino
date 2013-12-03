@@ -1,7 +1,7 @@
 // (http://learn.parallax.com/KickStart/27911)
   
 
-void getGyroValues() { // Calculates xdps/ydps/zdps and gx/gy/gz
+void getGyroValues() {                    // Calculates Rm values
   byte MSB, LSB;
 
   MSB = readI2C(0x29);
@@ -17,9 +17,7 @@ void getGyroValues() { // Calculates xdps/ydps/zdps and gx/gy/gz
   zRm = ((MSB << 8) | LSB); // Yaw
 }
 
-
-
-void getGyroDPS() {
+void getGyroDPS() {                       // Calculates DPS values from Rm values
   if(abs(xRm - xRo) > xRth) {
     dR = xRm - xRo;
     xdps = SC * (float)dR;
