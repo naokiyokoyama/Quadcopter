@@ -108,8 +108,8 @@ void logOldDPS() {
   zdps1 = zdps;
 }
 
-void getGyroAngles2() { // Approximate integration using the Trapezoidal Rule
-  gx += (((xdps + xdps1) * ((float)MicrosPassedPresent / 1000000)) / 2);
-  gy += (((ydps + ydps1) * ((float)MicrosPassedPresent / 1000000)) / 2);
-  gz += (((zdps + zdps1) * ((float)MicrosPassedPresent / 1000000)) / 2);
+void getGyroAnglesTrapezoidalRule() { // Approximate integration using the Trapezoidal Rule
+  gx += (((xdps + xdps1) * ((float)MicrosPassed / 1000000)) / 2);
+  gy += (((ydps + ydps1) * ((float)MicrosPassed / 1000000)) / 2);
+  gz += (((zdps + zdps1) * ((float)MicrosPassed / 1000000)) / 2);
 }

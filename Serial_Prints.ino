@@ -4,7 +4,7 @@ unsigned int MilliPrintTime = 10; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker) {
     PrintTracker = (millis() + MilliPrintTime);
-    KFilter();
+    Pitch&Roll();
     Serial.println( );
   }
 }
@@ -63,7 +63,7 @@ void DPS() {
   Serial.print(" R:"); Serial.print(Reduced);
 }
 
-void KFilter() {
+void Pitch&Roll() {
   Serial.print(" pitch:"); Serial.print(pitch);
   Serial.print(" roll:"); Serial.print(roll);
 }
