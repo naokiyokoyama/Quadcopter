@@ -41,9 +41,9 @@ void getGyroDPS() {                       // Calculates DPS values from Rm value
 }
 
 void getGyroAngles() {
-  gx += xdps * (float)MicrosPassed / 1000000;
-  gy += ydps * (float)MicrosPassed / 1000000;
-  gz += zdps * (float)MicrosPassed / 1000000;
+  gx = xdps * (float)MicrosPassed / 1000000.0;
+  gy = ydps * (float)MicrosPassed / 1000000.0;
+  gz = zdps * (float)MicrosPassed / 1000000.0;
 }
 
 void ZeroRateLevelCalibration() {

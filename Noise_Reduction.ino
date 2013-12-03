@@ -108,7 +108,7 @@ void logOldDPS() {
   zdps1 = zdps;
 }
 
-void getGyroAnglesTrapezoidalRule() { // Approximate integration using the Trapezoidal Rule
+void getDeltaGyroAnglesTrapezoidalRule() { // Approximate integration using the Trapezoidal Rule
   gx += (((xdps + xdps1) * ((float)MicrosPassed / 1000000)) / 2);
   gy += (((ydps + ydps1) * ((float)MicrosPassed / 1000000)) / 2);
   gz += (((zdps + zdps1) * ((float)MicrosPassed / 1000000)) / 2);

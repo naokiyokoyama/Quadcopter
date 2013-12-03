@@ -4,9 +4,16 @@ unsigned int MilliPrintTime = 10; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker) {
     PrintTracker = (millis() + MilliPrintTime);
-    Pitch&Roll();
+    PitchRoll();
+    IntegratedGyroValues();
     Serial.println( );
   }
+}
+
+void IntegratedGyroValues() {
+  Serial.print(" GyroPitch:"); Serial.print(gy);
+  Serial.print(" GyroRoll:"); Serial.print(gx);
+  Serial.print(" GyroYaw:"); Serial.print(gz);
 }
 
 void MilliLoopTime() {
@@ -63,7 +70,7 @@ void DPS() {
   Serial.print(" R:"); Serial.print(Reduced);
 }
 
-void Pitch&Roll() {
+void PitchRoll() {
   Serial.print(" pitch:"); Serial.print(pitch);
   Serial.print(" roll:"); Serial.print(roll);
 }

@@ -84,14 +84,14 @@ void loop() {
   MicrosTracker = micros(); 
   
   receiveTransmitterSignals();              // Uses the volatile interupt values to read each joystick (-500 ~ 500)
-  logGyroNoise();                           // Shifts Rm logs one place towards the past
+  logGyroNoise();                           // Saves the Rm values from the last loop before they are updated
   getGyroValues();                          // Computes Rm for each axis
   getAccelValues();                         // Computes acceleration in each axis                     
   reduceGyroNoise();                        // Filters radical noise from Rm to Rm2
   logOldDPS();                              // Saves the DPS values from the last loop before they are updated
   getGyroDPS2();                            // Filtered-byte-to-DPS conversion with Rm2, ambient noise filtering
   transformGyroDPS();                       // Rotates the mathematical model by 45 degrees
-  getGyroAngles2();                         // Gets the tilt using approximate integration with the Trapezoidal Rule and the time taken for the previous loop
+  getDeltaGyroAnglesTrapezoidalRule();      // Gets the change in tilt using approximate integration with the Trapezoidal Rule and the time taken for the previous loop
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   
   //ESCFunctions(); 
