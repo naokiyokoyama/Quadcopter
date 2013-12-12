@@ -70,9 +70,9 @@ void reduceGyroNoise() {
 }
 
 void transformGyroDPS() {
-  int holder = xdps;
+  int oldxdps = xdps;
   ydps = xdps/sqrt(2) - ydps/sqrt(2);
-  xdps = -1 * (holder/sqrt(2) + ydps/sqrt(2));  
+  xdps = -1 * (oldxdps/sqrt(2) + ydps/sqrt(2));  
 }
 
 void getGyroDPS2() {

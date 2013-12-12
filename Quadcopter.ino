@@ -26,17 +26,11 @@ Servo East; // Northeast
 const int ESCMin = 10; // Minimum pulse that will be sent to the ESC
 
 // GYROSCOPE //////////////////////////////////////////////////////////////////////////////////////////////////////
-#define CTRL_REG1 0x20
-#define CTRL_REG2 0x21
-#define CTRL_REG3 0x22
-#define CTRL_REG4 0x23
-#define CTRL_REG5 0x24
 
-int Addr = 105;                        // I2C Address of the gyroscope   
 float xdps, ydps, zdps;                // Degrees per second calculated for every axis
 float gx, gy, gz;                      // Intgrated angle values
     
-float SC = .07;                        // Scale factor in dps/LSB
+float SC = .07;                        // Scale factor in LSB/dps
 int xRm, yRm, zRm, dR;
 int xRo, yRo, zRo;                     // Zero rate level angles, or byte values when there is no rotational velocity present
 int xRth = 20;                         // Threshold for gyroscope byte values to reduce ambient noise
@@ -44,16 +38,15 @@ int yRth = 20;
 int zRth = 20; 
 
 // Variables used to calibrate the zero rate level angles
-long xRsum, yRsum, zRsum;               // The sum that will be divided to produce the average
-long C;                                 // The divisor, equal to the total amount of times the Rm has been read
-int MilliCalibrationTime = 3000;        // Time provided for calibration (Gyro, receiver) in milliseconds   
+
+int MilliCalibrationTime = 100;        // Time provided for calibration (Gyro, receiver) in milliseconds   
   
 // ACCELEROMETER //////////////////////////////////////////////////////////////////////////////////////////////////
  
 float ax, ay, az, ar, thetaX, thetaY, thetaZ;  
-float ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; 
+float ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; // After transformation
 
-// KALMAN FILTER
+// ANGLES
 double pitch, roll, yaw;
 
 // RECEIVER
@@ -64,11 +57,6 @@ volatile boolean LeftToggle, RightToggle;
 void setup() {
   Wire.begin();
   Serial.begin(9600);
-  writeI2C(CTRL_REG1, 0b00001111);    // Turn on all axes, disable power down
-  writeI2C(CTRL_REG2, 0b00000000);
-  writeI2C(CTRL_REG3, 0b00001000);    // Enable control ready signal
-  writeI2C(CTRL_REG4, 0b00110000);    // Set scale (2000 deg/sec)
-  setupMotors();
   setupPIDs();  
   setupReceiverInterrupts();
   while(!accel.begin() || !mag.begin()){}
