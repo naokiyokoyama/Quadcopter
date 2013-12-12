@@ -72,9 +72,17 @@ boolean RightToggleChanged = false;
 int LeftToggleSwitches, RightToggleSwitches;
 
 // SETUP FUNCTIONS
+
+void setupReceiverInterrupts() {
+  attachInterrupt(Ch1, risingCh1Signal, RISING);
+  attachInterrupt(Ch2, risingCh2Signal, RISING);
+  attachInterrupt(Ch3, risingCh3Signal, RISING);
+  attachInterrupt(Ch4, risingCh4Signal, RISING);
+}
+
 void CalibrateIdleReceiverValues() {
   unsigned long int IdleRxTracker;
-  int IdleRxTime= 100;
+  int IdleRxTime = 100;
   int loops;
   unsigned long int ch1s, ch2s, ch3s, ch4s; 
   IdleRxTracker = millis();
@@ -97,17 +105,6 @@ void CalibrateIdleReceiverValues2() {
   RightVerticalZero = RightVerticalVolatile;
   LeftHorizontalZero = LeftHorizontalVolatile;
 }
-
-void setupReceiverInterrupts() {
-  attachInterrupt(Ch1, risingCh1Signal, RISING);
-  attachInterrupt(Ch2, risingCh2Signal, RISING);
-  attachInterrupt(Ch3, risingCh3Signal, RISING);
-  attachInterrupt(Ch4, risingCh4Signal, RISING);
-}
-
-
-
-
 
 // MAIN LOOP FUNCTIONS
 

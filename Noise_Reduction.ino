@@ -3,7 +3,7 @@ int Noise_Byte_Threshold = 45;
 int Noise_Byte_Difference_Threshold = 15; 
 int xRm1, yRm1, zRm1, xRm2, yRm2, zRm2; 
 unsigned int Reduced; // Amount of drastic noise removed
-int xdps1, ydps1, zdps1;
+
 
 void logGyroNoise() {
   xRm1 = xRm2;
@@ -69,13 +69,8 @@ void reduceGyroNoise() {
   {zRm2 = (zRm + zRm1) / 2; Reduced++;}
 }
 
-void transformGyroDPS() {
-  int oldxdps = xdps;
-  ydps = xdps/sqrt(2) - ydps/sqrt(2);
-  xdps = -1 * (oldxdps/sqrt(2) + ydps/sqrt(2));  
-}
-
 void getGyroDPS2() {
+  int dR;
   if(abs(xRm2 - xRo) > xRth) {
     dR = xRm2 - xRo;
     xdps = SC * (float)dR;
@@ -102,14 +97,5 @@ void logMicrosPassed() {
   MicrosPassedPresent = MicrosPassed;
 }
 
-void logOldDPS() { 
-  xdps1 = xdps;
-  ydps1 = ydps;
-  zdps1 = zdps;
-}
 
-void getDeltaGyroAnglesTrapezoidalRule() { // Approximate integration using the Trapezoidal Rule
-  gx += (((xdps + xdps1) * ((float)MicrosPassed / 1000000)) / 2);
-  gy += (((ydps + ydps1) * ((float)MicrosPassed / 1000000)) / 2);
-  gz += (((zdps + zdps1) * ((float)MicrosPassed / 1000000)) / 2);
-}
+

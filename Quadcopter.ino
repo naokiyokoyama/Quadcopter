@@ -1,12 +1,12 @@
 #include <Adafruit_Sensor.h>
-#include <Adafruit_LSM303.h>
+#include <Adafruit_LSM303_U.h>
 #include <Wire.h>
 #include <PID_v1.h>
 #include <Servo.h>
 
 // Assign a unique ID to the Adafruit sensors
-Adafruit_LSM303_Accel accel = Adafruit_LSM303_Accel(54321);
-Adafruit_LSM303_Mag mag = Adafruit_LSM303_Mag(12345);
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
+Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 
 unsigned long MicrosPassed;
 unsigned long MicrosPassedPresent;
@@ -16,7 +16,7 @@ unsigned long LoopTracker;
 unsigned int LoopTime;
 
 // ESC ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-boolean STOP;
+boolean STOP = false;
 
 Servo North; // Northwest
 Servo West; // Southwest
@@ -26,13 +26,33 @@ Servo East; // Northeast
 const int ESCMin = 10; // Minimum pulse that will be sent to the ESC
 
 // GYROSCOPE //////////////////////////////////////////////////////////////////////////////////////////////////////
+char WHO_AM_I = 0x00;
+char SMPLRT_DIV= 0x15;
+char DLPF_FS = 0x16;
+char GYRO_XOUT_H = 0x1D;
+char GYRO_XOUT_L = 0x1E;
+char GYRO_YOUT_H = 0x1F;
+char GYRO_YOUT_L = 0x20;
+char GYRO_ZOUT_H = 0x21;
+char GYRO_ZOUT_L = 0x22;
+
+char DLPF_CFG_0 = (1<<0);
+char DLPF_CFG_1 = (1<<1);
+char DLPF_CFG_2 = (1<<2);
+char DLPF_FS_SEL_0 = (1<<3);
+char DLPF_FS_SEL_1 = (1<<4);
+
+char itgAddress = 0x69;
+
+long xRmSum, yRmSum, zRmSum, ZRLCloops;
 
 float xdps, ydps, zdps;                // Degrees per second calculated for every axis
+float xdps1, ydps1, zdps1;
 float gx, gy, gz;                      // Intgrated angle values
     
-float SC = .07;                        // Scale factor in LSB/dps
-int xRm, yRm, zRm, dR;
-int xRo, yRo, zRo;                     // Zero rate level angles, or byte values when there is no rotational velocity present
+float SC = 1.0/14.375;                 // Scale factor in dps/LSB
+int xRm, yRm, zRm;
+int xRo, yRo, zRo;                     // Zero rate level angles, or byte values when there is no angular velocity present
 int xRth = 20;                         // Threshold for gyroscope byte values to reduce ambient noise
 int yRth = 20;
 int zRth = 20; 
@@ -59,10 +79,13 @@ void setup() {
   Serial.begin(9600);
   setupPIDs();  
   setupReceiverInterrupts();
+  setupMotors();
   while(!accel.begin() || !mag.begin()){}
   delay(300);
-  CalibrateIdleReceiverValues2();
-  ZeroRateLevelCalibration();
+  itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_0)); //Set the gyroscope scale for the outputs to +/-2000 degrees per second
+  itgWrite(itgAddress, SMPLRT_DIV, 9);       // Set the sample rate to 100 hz
+  ZeroRateLevelCalibration();                // Creates xRo, yRo, zRo
+  CalibrateIdleReceiverValues();
   while(millis() < 7000) {}
   MicrosTracker = micros();
 }
@@ -72,18 +95,18 @@ void loop() {
   MicrosTracker = micros(); 
   
   receiveTransmitterSignals();              // Uses the volatile interupt values to read each joystick (-500 ~ 500)
-  logGyroNoise();                           // Saves the Rm values from the last loop before they are updated
+  //logGyroNoise();                           // Saves the Rm values from the last loop before they are updated
   getGyroValues();                          // Computes Rm for each axis
   getAccelValues();                         // Computes acceleration in each axis                     
-  reduceGyroNoise();                        // Filters radical noise from Rm to Rm2
+  //reduceGyroNoise();                        // Filters radical noise from Rm to Rm2
   logOldDPS();                              // Saves the DPS values from the last loop before they are updated
-  getGyroDPS2();                            // Filtered-byte-to-DPS conversion with Rm2, ambient noise filtering
+  getGyroDPS();                            // Filtered-byte-to-DPS conversion with Rm2, ambient noise filtering
   transformGyroDPS();                       // Rotates the mathematical model by 45 degrees
   getDeltaGyroAnglesTrapezoidalRule();      // Gets the change in tilt using approximate integration with the Trapezoidal Rule and the time taken for the previous loop
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   
-  //ESCFunctions(); 
-  printValues();
+  ESCFunctions(); 
+  //printValues();
   
   MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
   //LoopTime = millis() - LoopTracker;

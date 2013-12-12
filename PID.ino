@@ -1,14 +1,14 @@
 int HoverThrottle = 30;
-int MaxWave = 100;
+int MaxWave = 80;
 
 double DesiredPitch = 0.0;
 double DesiredRoll = 0.0;
 
 double NSComplement, WEComplement;
 
-double Kp = .15;//.4
-double Ki = 0.01;
-double Kd = 0.05;//.037
+double Kp = 0.15;//.4
+double Ki = 0.0;
+double Kd = 0.0;//.037
 
 double Kpsoft = 0.25;//.4
 double Kisoft = 0.0;

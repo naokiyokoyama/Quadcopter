@@ -5,9 +5,24 @@ void printValues() {
   if(millis() >= PrintTracker) {
     PrintTracker = (millis() + MilliPrintTime);
     PitchRoll();
-    IntegratedGyroValues();
     Serial.println( );
   }
+}
+
+void CompareGyroAccelPitchRoll() {
+  Serial.print(" thetaX2: "); Serial.print(thetaX2);
+  Serial.print(" gx: "); Serial.print(gx);
+  Serial.print(" thetaY2: "); Serial.print(thetaY2);
+  Serial.print(" gy: "); Serial.print(gy);
+}
+
+void CompareRoRm() {
+  Serial.print(" xRo:"); Serial.print(xRo);
+  Serial.print(" yRo:"); Serial.print(yRo);
+  Serial.print(" zRo:"); Serial.print(zRo);
+  Serial.print(" xRm:"); Serial.print(xRm);
+  Serial.print(" yRm:"); Serial.print(yRm);
+  Serial.print(" zRm:"); Serial.print(zRm);
 }
 
 void IntegratedGyroValues() {
@@ -94,6 +109,9 @@ void Theta() {
   Serial.print(" thetaX:"); Serial.print(thetaX);
   Serial.print(" thetaY:"); Serial.print(thetaY);
   Serial.print(" thetaZ:"); Serial.print(thetaZ);
+  Serial.print(" thetaX2:"); Serial.print(thetaX2);
+  Serial.print(" thetaY2:"); Serial.print(thetaY2);
+  Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
 }
 
 void pidvalues() {

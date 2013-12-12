@@ -24,15 +24,15 @@ long pitchsum, rollsum;
 float LevelRoll, LevelPitch;
 
 void AccelLevelCalibration() {
-  C = 0;
+  unsigned long loops;
   pitchsum = 0;
   rollsum = 0;
   MillisTracker = millis();
   while(millis() < MillisTracker + MilliCalibrationTime) {
     pitchsum += pitch;
     rollsum += roll;
-    C++;
+    loops++;
   }
-  LevelPitch = pitchsum / C;
-  LevelRoll = rollsum / C;
+  LevelPitch = pitchsum / loops;
+  LevelRoll = rollsum / loops;
 }   
