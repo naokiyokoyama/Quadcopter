@@ -1,7 +1,6 @@
-// Multiply by 0.07 to get degrees
+// Multiply by SC (1/14.375) to get degrees
 int Noise_Byte_Threshold = 45;             
 int Noise_Byte_Difference_Threshold = 15; 
-int xRm1, yRm1, zRm1, xRm2, yRm2, zRm2; 
 unsigned int Reduced; // Amount of drastic noise removed
 
 

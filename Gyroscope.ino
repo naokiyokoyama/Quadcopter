@@ -20,24 +20,24 @@ void getGyroValues() {
   zRm = readZ();
 }
 
-void getGyroDPS() {
+void getGyroDPS(int XRM, int YRM, int ZRM) {
   int dR;
-  if(abs(xRm - xRo) > xRth) {
-    dR = xRm - xRo;
+  if(abs(XRM - xRo) > xRth) {
+    dR = XRM - xRo;
     xdps = SC * (float)dR;
   }
   else
   {xdps = 0;}
   
-  if(abs(yRm - yRo) > yRth) {
-    dR = yRm - yRo;
+  if(abs(YRM - yRo) > yRth) {
+    dR = YRM - yRo;
     ydps = SC * (float)dR;
   }
   else
   {ydps = 0;}
   
-  if(abs(zRm - zRo) > zRth) {
-    dR = zRm - zRo;
+  if(abs(ZRM - zRo) > zRth) {
+    dR = ZRM - zRo;
     zdps = SC * (float)dR;
   }
   else

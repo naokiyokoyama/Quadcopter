@@ -4,7 +4,7 @@ unsigned int MilliPrintTime = 10; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker) {
     PrintTracker = (millis() + MilliPrintTime);
-    PitchRoll();
+    DPS();
     Serial.println( );
   }
 }
@@ -99,10 +99,10 @@ void Accel() {
 void Accel2() {
   Serial.print(" ax2:"); Serial.print(ax2);
   Serial.print(" ay2:"); Serial.print(ay2);
-  //Serial.print(" az2:"); Serial.print(az2);
+  Serial.print(" az2:"); Serial.print(az2);
   Serial.print(" thetaX2:"); Serial.print(thetaX2);
   Serial.print(" thetaY2:"); Serial.print(thetaY2);
-  //Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
+  Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
 }
 
 void Theta() {
@@ -117,8 +117,8 @@ void Theta() {
 void pidvalues() {
   Serial.print(" pitch:"); Serial.print(pitch);
   Serial.print("     NSComplement:"); Serial.print(NSComplement);
-  //Serial.print(" roll:"); Serial.print(roll);
-  //Serial.print(" WEComplement:"); Serial.print(WEComplement);
+  Serial.print("     roll:"); Serial.print(roll);
+  Serial.print("     WEComplement:"); Serial.print(WEComplement);
   Serial.print("     North Motor:"); Serial.print((HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2));
   Serial.print("     South Motor:"); Serial.print((HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2));
 }

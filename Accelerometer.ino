@@ -36,3 +36,19 @@ void AccelLevelCalibration() {
   LevelPitch = pitchsum / loops;
   LevelRoll = rollsum / loops;
 }   
+
+int readI2C (int Address, byte regAddr) {
+    Wire.beginTransmission(Address);
+    Wire.write(regAddr);                // Register address to read
+    Wire.endTransmission();             // Terminate request
+    Wire.requestFrom(Address, 1);          // Read a byte
+    while(!Wire.available()) { };       // Wait for receipt
+    return(Wire.read());                // Get result
+}
+
+void writeI2C (int Address, byte regAddr, byte val) {
+    Wire.beginTransmission(Address);
+    Wire.write(regAddr);
+    Wire.write(val);
+    Wire.endTransmission();
+}

@@ -3,7 +3,7 @@
 #include <Wire.h>
 #include <PID_v1.h>
 #include <Servo.h>
-
+double pitch2;
 // Assign a unique ID to the Adafruit sensors
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(54321);
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
@@ -44,6 +44,8 @@ char DLPF_FS_SEL_1 = (1<<4);
 
 char itgAddress = 0x69;
 
+int GyroAddress = 105;
+
 long xRmSum, yRmSum, zRmSum, ZRLCloops;
 
 float xdps, ydps, zdps;                // Degrees per second calculated for every axis
@@ -52,6 +54,7 @@ float gx, gy, gz;                      // Intgrated angle values
     
 float SC = 1.0/14.375;                 // Scale factor in dps/LSB
 int xRm, yRm, zRm;
+int xRm1, yRm1, zRm1, xRm2, yRm2, zRm2; 
 int xRo, yRo, zRo;                     // Zero rate level angles, or byte values when there is no angular velocity present
 int xRth = 20;                         // Threshold for gyroscope byte values to reduce ambient noise
 int yRth = 20;
@@ -62,6 +65,10 @@ int zRth = 20;
 int MilliCalibrationTime = 100;        // Time provided for calibration (Gyro, receiver) in milliseconds   
   
 // ACCELEROMETER //////////////////////////////////////////////////////////////////////////////////////////////////
+ 
+#define CTRL_REG2_A 0x21
+ 
+int AccelAddress = 25; 
  
 float ax, ay, az, ar, thetaX, thetaY, thetaZ;  
 float ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; // After transformation
@@ -82,11 +89,12 @@ void setup() {
   setupMotors();
   while(!accel.begin() || !mag.begin()){}
   delay(300);
+  writeI2C(AccelAddress, CTRL_REG2_A, 0b01111011);
   itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_0)); //Set the gyroscope scale for the outputs to +/-2000 degrees per second
   itgWrite(itgAddress, SMPLRT_DIV, 9);       // Set the sample rate to 100 hz
   ZeroRateLevelCalibration();                // Creates xRo, yRo, zRo
   CalibrateIdleReceiverValues();
-  while(millis() < 7000) {}
+  while(millis() < 6000) {}
   MicrosTracker = micros();
 }
 
@@ -95,14 +103,14 @@ void loop() {
   MicrosTracker = micros(); 
   
   receiveTransmitterSignals();              // Uses the volatile interupt values to read each joystick (-500 ~ 500)
-  //logGyroNoise();                           // Saves the Rm values from the last loop before they are updated
-  getGyroValues();                          // Computes Rm for each axis
-  getAccelValues();                         // Computes acceleration in each axis                     
-  //reduceGyroNoise();                        // Filters radical noise from Rm to Rm2
-  logOldDPS();                              // Saves the DPS values from the last loop before they are updated
-  getGyroDPS();                            // Filtered-byte-to-DPS conversion with Rm2, ambient noise filtering
+  //logGyroNoise();                         // Saves the Rm values from the last loop before they are updated
+  getGyroValues();                          // Computes Rm for each axis                     
+  //reduceGyroNoise();                      // Filters radical noise from Rm to Rm2
+  logOldDPS();                              // Saves the DPS values from the last loop before they are updated for the Trapezoidal Rule
+  getGyroDPS(xRm, yRm, zRm);                // Converts nRm values into ndps (multiply by SC, threshold filtering)
   transformGyroDPS();                       // Rotates the mathematical model by 45 degrees
-  getDeltaGyroAnglesTrapezoidalRule();      // Gets the change in tilt using approximate integration with the Trapezoidal Rule and the time taken for the previous loop
+  getDeltaGyroAnglesTrapezoidalRule();      // Gets the change in tilt using approximate integration with the time taken for the previous loop via Trapezoidal Rule
+  getAccelValues();                         // Computes acceleration and tilt in each axis
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   
   ESCFunctions(); 
@@ -114,6 +122,7 @@ void loop() {
 void ESCFunctions() {
   if(!STOP) {
     Hover();
+    //checkPairRatio();
     //testSimple();
     triggerSTOP();
   }

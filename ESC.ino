@@ -18,15 +18,15 @@ void setupMotors() {
 }
 
 void testSimple() {
-  North.write(50);
-  West.write(50);
-  South.write(50);
-  East.write(50);
+  North.write(110);
+  West.write(10);
+  South.write(80);
+  East.write(10);
 }
 
 void triggerSTOP() {
   //if(LeftVertical > 480) {STOP = true;}
-  if(thetaZ < 10.0) {STOP = true;}
+  //if(thetaZ < 10.0) {STOP = true;}
   if(StopPoints == StopTarget) {STOP = true;}
   if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
     StopTracker = millis();
