@@ -25,7 +25,7 @@ void testSimple() {
 }
 
 void triggerSTOP() {
-  //if(LeftVertical > 480) {STOP = true;}
+  if(RightHorizontal > 480) {STOP = true;}
   //if(thetaZ < 10.0) {STOP = true;}
   if(StopPoints == StopTarget) {STOP = true;}
   if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {

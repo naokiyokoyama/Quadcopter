@@ -75,6 +75,7 @@ float ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; // After transformation
 
 // ANGLES
 double pitch, roll, yaw;
+double oldpitch, oldroll, oldyaw;
 
 // RECEIVER
 volatile int RightHorizontalVolatile, LeftVerticalVolatile, RightVerticalVolatile, LeftHorizontalVolatile;
@@ -121,7 +122,8 @@ void loop() {
 }  
 void ESCFunctions() {
   if(!STOP) {
-    Hover();
+    MITPID();
+    //Hover();
     //checkPairRatio();
     //testSimple();
     triggerSTOP();

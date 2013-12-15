@@ -45,9 +45,9 @@ void getGyroDPS(int XRM, int YRM, int ZRM) {
 }
 
 void transformGyroDPS() {
-  int oldxdps = xdps;
+  int oldydps = ydps;
   ydps = xdps/sqrt(2) - ydps/sqrt(2);
-  xdps = -1 * (oldxdps/sqrt(2) + ydps/sqrt(2));  
+  xdps = -1 * (xdps/sqrt(2) + oldydps/sqrt(2));  
 }
 
 void logOldDPS() { 
