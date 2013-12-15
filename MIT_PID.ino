@@ -9,9 +9,11 @@ double rollin = 0.0;
 double pitchin = 0.0;
 
 double p = 0.256;
-double i = 0.03;
-double d = 0.079;
+double i = 0.00;
+double d = 0.00;
+double period = 0.0;
 
+double droll, iroll, dpitch, ipitch;
 
 void MITPID() {
   deltaPID();
@@ -22,7 +24,7 @@ void MITPID() {
   }
   
   West.write(speeds[1]);
-  East.write(speeds[0] + 1);
+  East.write(speeds[0]);
 }
 
 void simplePD() {
@@ -33,8 +35,38 @@ void simplePD() {
 }
 
 void deltaPID() {
-  speeds[0] = HoverThrottle2 - (int) ( p*(roll - rollin) - i*(roll - oldroll) * ( (double) MicrosPassed / 1000000) ) - d*(roll - oldroll)/ ( (double) MicrosPassed / 1000000) ;
-  speeds[1] = HoverThrottle2 - (int) ( p*(rollin - roll) + i*(roll - oldroll) * ( (double) MicrosPassed / 1000000) ) + d*(roll - oldroll)/ ( (double) MicrosPassed / 1000000) ;
-  speeds[2] = HoverThrottle2 - (int) ( p*(pitch - pitchin) - i*(pitch - oldpitch) * ( (double) MicrosPassed / 1000000) ) - d*(pitch - oldpitch)/ ( (double) MicrosPassed / 1000000) ;
-  speeds[3] = HoverThrottle2 - (int) ( p*(pitchin - pitch) + i*(pitch - oldpitch) * ( (double) MicrosPassed / 1000000) ) + d*(pitch - oldpitch)/ ( (double) MicrosPassed / 1000000) ;
+  droll = (roll - oldroll) / ( (double) MicrosPassed / 1000000.0);
+  dpitch = (pitch - oldpitch)/ ( (double) MicrosPassed / 1000000.0);
+  iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
+  ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
+  speeds[0] = HoverThrottle2 - p*(roll - rollin) - i*iroll - d*droll;
+  speeds[1] = HoverThrottle2 + p*(roll - rollin) + i*iroll + d*droll;
+  speeds[2] = HoverThrottle2 - p*(pitch - pitchin) - i*ipitch - d*dpitch;
+  speeds[3] = HoverThrottle2 + p*(pitch - pitchin) + i*ipitch + d*dpitch;
 }
+
+void SetTuningsClassicPID() {
+ p = 0.6 * p;
+ i = 2.0 * p / period;
+ d = p * period / 8.0;
+}
+
+void SetTuningsPessenIntegralRule() {
+ p = 0.7 * p;
+ i = 2.5 * p / period;
+ d = p * period * 0.15;
+}
+
+void SetTuningsSomeOvershoot() {
+ p = 0.33 * p;
+ i = 2.0 * p / period;
+ d = p * period / 3.0;
+}
+
+void SetTuningsClassicPID() {
+ p = 0.2 * p;
+ i = 2.0 * p / period;
+ d = p * period / 8.0;
+}
+ 
+ 

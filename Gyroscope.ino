@@ -62,12 +62,6 @@ void getGyroAngles() {
   gz = zdps * (float)MicrosPassed / 1000000.0;
 }
 
-void getDeltaGyroAnglesTrapezoidalRule() { // Approximate integration using the Trapezoidal Rule
-  gx = (((xdps + xdps1) * ((float)MicrosPassed / 1000000)) / 2);
-  gy = (((ydps + ydps1) * ((float)MicrosPassed / 1000000)) / 2);
-  gz = (((zdps + zdps1) * ((float)MicrosPassed / 1000000)) / 2);
-}
-
 //This function will write a value to a register on the itg-3200.
 //Parameters:
 //  char address: The I2C address of the sensor. For the ITG-3200 breakout the address is 0x69.

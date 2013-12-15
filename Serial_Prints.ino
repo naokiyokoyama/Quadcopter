@@ -4,7 +4,7 @@ unsigned int MilliPrintTime = 10; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker) {
     PrintTracker = (millis() + MilliPrintTime);
-    DPS();
+    PitchRoll();
     Serial.println( );
   }
 }

@@ -110,7 +110,9 @@ void loop() {
   logOldDPS();                              // Saves the DPS values from the last loop before they are updated for the Trapezoidal Rule
   getGyroDPS(xRm, yRm, zRm);                // Converts nRm values into ndps (multiply by SC, threshold filtering)
   transformGyroDPS();                       // Rotates the mathematical model by 45 degrees
-  getDeltaGyroAnglesTrapezoidalRule();      // Gets the change in tilt using approximate integration with the time taken for the previous loop via Trapezoidal Rule
+  gx = DeltaTrapezoidalRule(xdps1, xdps);
+  gy = DeltaTrapezoidalRule(ydps1, ydps);
+  gz = DeltaTrapezoidalRule(zdps1, zdps);
   getAccelValues();                         // Computes acceleration and tilt in each axis
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   
@@ -135,6 +137,11 @@ void ESCFunctions() {
     East.write(ESCMin);
     while(1 == 1) {}
   }
+}
+
+float DeltaTrapezoidalRule(float old, float current) { // Approximate integration using the Trapezoidal Rule
+  float trapezoid = (((old + current) * ((float)MicrosPassed / 1000000)) / 2);
+  return trapezoid;
 }
 
 
