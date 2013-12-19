@@ -73,7 +73,7 @@ int AccelAddress = 25;
 
 double ax, ay, az, ar, thetaX, thetaY, thetaZ;  
 double ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; // After transformation
-double fthetaY;
+double fthetaY, fthetaX;
 
 // ANGLES
 const double CFRatio = .98;
@@ -86,7 +86,7 @@ volatile boolean LeftToggle, RightToggle;
 
 void setup() {
   Wire.begin();
-  Serial.begin(9600);
+  //Serial.begin(9600);
   
   // Attach pin numbers for servo functions
   setupMotors();
@@ -125,6 +125,7 @@ void setup() {
     gz = DeltaTrapezoidalRule(zdps1, zdps);
     getAccelValues();                         // Computes acceleration and tilt in each axis
     ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
+    reduceNoise();
     //printValues();
     MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
   }
@@ -144,17 +145,17 @@ void loop() {
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   ESCFunctions(); 
   reduceNoise();
-  printValues();
+  //printValues();
   MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
   
   
 }  
 void ESCFunctions() {
   if(!STOP) {
-    //MITPID();
+    MITPID();
     //Hover();
     //checkPairRatio();
-    testSimple();
+    //testSimple();
     triggerSTOP();
   }
   else {

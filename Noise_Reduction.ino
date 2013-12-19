@@ -1,9 +1,9 @@
 // VARIABLES
 
-const int samples = 300;
+const int samples = 100;
 unsigned int samplesum;
-double pitchRm[samples];  // Contains past values in order to filter out noise, with [0] being the most recent
-double rollRm[samples];
+double thetaXRm[samples];  // Contains past values in order to filter out noise, with [0] being the most recent
+double thetaYRm[samples];
 double ratios[samples];
 
 void setupRatiosVector(){
@@ -15,21 +15,21 @@ void setupRatiosVector(){
 
 void reduceNoise(){
   for(int x=(samples - 1); x>0; x--) {
-    pitchRm[x] = pitchRm[x-1];
-    rollRm[x] = rollRm[x-1];
+    thetaXRm[x] = thetaXRm[x-1];
+    thetaYRm[x] = thetaYRm[x-1];
   }
   
-  pitchRm[0] = pitch;
-  rollRm[0] = roll;
+  thetaXRm[0] = thetaX;
+  thetaYRm[0] = thetaY;
   
-  fpitch = 0.0;
-  froll = 0.0;
+  fthetaX = 0.0;
+  fthetaY = 0.0;
   
   for(int x=0; x<samples; x++) {
-    fpitch += pitchRm[x] * ratios[x];
-    froll += rollRm[x] * ratios[x];
+    fthetaX += thetaXRm[x] * ratios[x];
+    fthetaY += thetaYRm[x] * ratios[x];
   }
   
-  pitchRm[0] = fpitch;
-  rollRm[0] = froll;
+//  thetaXRm[0] = fthetaX;
+//  thetaYRm[0] = fthetaY;
 }

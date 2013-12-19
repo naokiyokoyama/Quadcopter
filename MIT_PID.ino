@@ -9,7 +9,7 @@ double rollin = 0.0;
 double pitchin = 0.0;//-48.4;
 
 double p = 0.256; //.36
-double i = 0.4;    //0.9527812;
+double i = 0.9527812;
 double d = 0.07;
 double period = 1.379;
 
