@@ -15,8 +15,8 @@ void ZeroRateLevelCalibration() {
 }   
 
 void getGyroValues() {
-  xRm = readX();
-  yRm = readY();
+  xRm = -readY();
+  yRm = readX();
   zRm = readZ();
 }
 

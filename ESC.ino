@@ -18,31 +18,32 @@ void setupMotors() {
 }
 
 void testSimple() {
-  North.write(110);
+  North.write(90);
   West.write(10);
-  South.write(80);
+  South.write(90);
   East.write(10);
 }
 
 void triggerSTOP() {
-  if(RightHorizontal > 480) {STOP = true;}
+  //if(RightHorizontal > 480) {STOP = true;}
+  if(RightVertical() < -100) {STOP = true;}
   //if(thetaZ < 10.0) {STOP = true;}
-  if(StopPoints == StopTarget) {STOP = true;}
-  if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
-    StopTracker = millis();
-    lastPivot = zdps;
-    StopBegun = true;
-    StopPoints = 1;
-  }
-  if((StopBegun && millis() - StopTracker < MilliStopperTime) && ((lastPivot < 0 && zdps > PivotSpeedThreshold) || (lastPivot > 0 && zdps < -1 * PivotSpeedThreshold))) {
-    StopPoints++;
-    lastPivot = zdps;
-    StopTracker = millis();
-  }
-  if(StopBegun && millis() - StopTracker >= MilliStopperTime) {
-    StopBegun = false;
-    StopPoints = 0;
-  }
+//  if(StopPoints == StopTarget) {STOP = true;}
+//  if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
+//    StopTracker = millis();
+//    lastPivot = zdps;
+//    StopBegun = true;
+//    StopPoints = 1;
+//  }
+//  if((StopBegun && millis() - StopTracker < MilliStopperTime) && ((lastPivot < 0 && zdps > PivotSpeedThreshold) || (lastPivot > 0 && zdps < -1 * PivotSpeedThreshold))) {
+//    StopPoints++;
+//    lastPivot = zdps;
+//    StopTracker = millis();
+//  }
+//  if(StopBegun && millis() - StopTracker >= MilliStopperTime) {
+//    StopBegun = false;
+//    StopPoints = 0;
+//  }
 }
 
 

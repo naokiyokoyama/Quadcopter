@@ -2,13 +2,13 @@ void getAccelValues() {
   sensors_event_t aevent;
   accel.getEvent(&aevent);
   
-  ay = aevent.acceleration.x;
-  ax = aevent.acceleration.y;
+  ax = aevent.acceleration.x;
+  ay = aevent.acceleration.y;
   az = -1 * aevent.acceleration.z;
 
   ar = sqrt(ax*ax + ay*ay + az*az);
   
-  thetaX = -1 * (90.0 - (acos(ax/ar)*(180.0/PI)));
+  thetaX = 90.0 - (acos(ax/ar)*(180.0/PI));
   thetaY = 90.0 - (acos(ay/ar)*(180.0/PI));
   thetaZ = acos(az/ar)*(180.0/PI);
   

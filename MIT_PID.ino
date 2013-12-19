@@ -1,21 +1,31 @@
 
 int speeds[4];
 
-int MaxWave2 = 150;        // Upper speed limit
+int MaxWave2 = 179;        // Upper speed limit
 int MinWave2 = 40;         // Lower speed limit
 int HoverThrottle2 = 100;  // Speed of motor when level
 
 double rollin = 0.0;
-double pitchin = 0.0;
+double pitchin = 0.0;//-48.4;
 
-double p = 0.256;
-double i = 0.00;
-double d = 0.00;
-double period = 0.0;
+double p = 0.256; //.36
+double i = 0.4;    //0.9527812;
+double d = 0.07;
+double period = 1.379;
 
 double droll, iroll, dpitch, ipitch;
 
 void MITPID() {
+  if(LeftVertical() > 250) {
+   if(LeftVertical() > 400) pitchin = 30.0;
+   else pitchin = 15.0; 
+  }
+  else if (LeftVertical() < -250) {
+   if(LeftVertical() < -400) pitchin = -30.0;
+   else pitchin = -15.0; 
+  }
+  else pitchin = 0.0;
+  
   deltaPID();
   
   for(int x=0; x<4; x++) {
@@ -23,8 +33,8 @@ void MITPID() {
     if(speeds[x]<MinWave2) speeds[x]=MinWave2;
   }
   
-  West.write(speeds[1]);
-  East.write(speeds[0]);
+  North.write(speeds[2]);
+  South.write(speeds[3]);
 }
 
 void simplePD() {
@@ -35,7 +45,7 @@ void simplePD() {
 }
 
 void deltaPID() {
-  droll = (roll - oldroll) / ( (double) MicrosPassed / 1000000.0);
+  droll = (roll - oldroll)/ ( (double) MicrosPassed / 1000000.0);
   dpitch = (pitch - oldpitch)/ ( (double) MicrosPassed / 1000000.0);
   iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
   ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
@@ -63,9 +73,9 @@ void SetTuningsSomeOvershoot() {
  d = p * period / 3.0;
 }
 
-void SetTuningsClassicPID() {
+void SetTuningsNoOvershoot() {
  p = 0.2 * p;
- i = 2.0 * p / period;
+ i = 2.2 * p / period;
  d = p * period / 8.0;
 }
  

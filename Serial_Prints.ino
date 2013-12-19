@@ -1,11 +1,11 @@
 unsigned long PrintTracker;
-unsigned int MilliPrintTime = 10; // Time between prints in milliseconds
+unsigned int MilliPrintTime = 150; // Time between prints in milliseconds
 
 void printValues() {
   if(millis() >= PrintTracker) {
     PrintTracker = (millis() + MilliPrintTime);
-    PitchRoll();
-    Serial.println( );
+    MATLABGraph();
+    Serial.println();
   }
 }
 
@@ -40,23 +40,15 @@ void VolatileControls() {
   Serial.print(" LeftVerticalVolatile:"); Serial.print(LeftVerticalVolatile);
   Serial.print(" RightVerticalVolatile:"); Serial.print(RightVerticalVolatile);
   Serial.print(" LeftHorizontalVolatile:"); Serial.print(LeftHorizontalVolatile);
-  Serial.print(" LeftToggleVolatile:"); Serial.print(LeftToggle);
-  Serial.print(" RightToggleVolatile:"); Serial.print(RightToggle);
-  //Serial.print(" leftwave:"); Serial.print(leftwave); Serial.print(" rightwave:"); Serial.print(rightwave);
-  Serial.print(" LeftToggleSwitches:"); Serial.print(LeftToggleSwitches);
-  Serial.print(" RightToggleSwitches:"); Serial.print(RightToggleSwitches);
+
 }
 
 void Controls() {
-  Serial.print(" RightHorizontal:"); Serial.print(RightHorizontal);
-  Serial.print(" LeftVertical:"); Serial.print(LeftVertical);
-  Serial.print(" RightVertical:"); Serial.print(RightVertical);
-  Serial.print(" LeftHorizontal:"); Serial.print(LeftHorizontal);
-  Serial.print(" LeftToggle:"); Serial.print(LeftToggle);
-  Serial.print(" RightToggle:"); Serial.print(RightToggle);
-  //Serial.print(" leftwave:"); Serial.print(leftwave); Serial.print(" rightwave:"); Serial.print(rightwave);
-  Serial.print(" LeftToggleSwitches:"); Serial.print(LeftToggleSwitches);
-  Serial.print(" RightToggleSwitches:"); Serial.print(RightToggleSwitches);
+  Serial.print(" RightHorizontal:"); Serial.print(RightHorizontal());
+  Serial.print(" LeftVertical:"); Serial.print(LeftVertical());
+  Serial.print(" RightVertical:"); Serial.print(RightVertical());
+  Serial.print(" LeftHorizontal:"); Serial.print(LeftHorizontal());
+
 }
 
 void ZeroControls() {
@@ -82,13 +74,27 @@ void DPS() {
   Serial.print(" xdps:"); Serial.print(xdps);
   Serial.print(" ydps:"); Serial.print(ydps);
   Serial.print(" zdps:"); Serial.print(zdps);
-  Serial.print(" R:"); Serial.print(Reduced);
+  //Serial.print(" R:"); Serial.print(Reduced);
 }
 
 void PitchRoll() {
   Serial.print(" pitch:"); Serial.print(pitch);
   Serial.print(" roll:"); Serial.print(roll);
 }
+
+void fPitchRoll() {
+  Serial.print(" fpitch:"); Serial.print(fpitch);
+  Serial.print(" froll:"); Serial.print(froll);
+}
+
+void MATLABGraph() {
+  Serial.print("       "); Serial.print(fpitch);
+  Serial.print("       "); Serial.print(froll);
+  Serial.print("       "); Serial.print(pitch);
+  Serial.print("       "); Serial.print(roll);
+  Serial.print("       "); Serial.print(millis());
+}
+
   
 void Accel() {
   Serial.print(" ax:"); Serial.print(ax);
@@ -109,9 +115,9 @@ void Theta() {
   Serial.print(" thetaX:"); Serial.print(thetaX);
   Serial.print(" thetaY:"); Serial.print(thetaY);
   Serial.print(" thetaZ:"); Serial.print(thetaZ);
-  Serial.print(" thetaX2:"); Serial.print(thetaX2);
-  Serial.print(" thetaY2:"); Serial.print(thetaY2);
-  Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
+  //Serial.print(" thetaX2:"); Serial.print(thetaX2);
+  //Serial.print(" thetaY2:"); Serial.print(thetaY2);
+  //Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
 }
 
 void pidvalues() {

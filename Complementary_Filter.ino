@@ -3,6 +3,7 @@
 void ComplementaryFilter() {
   oldpitch = pitch;
   oldroll = roll;
-  pitch = (.98)*(pitch + gy)+(0.02)*(thetaY2);
-  roll = (.98)*(roll + gx)+(0.02)*(thetaX2);
+  pitch = (CFRatio)*(pitch + gy)+(1.0 - CFRatio)*(thetaY);
+  roll = (CFRatio)*(roll + gx)+(1.0 - CFRatio)*(thetaX);
 }
+

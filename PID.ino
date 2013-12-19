@@ -39,15 +39,8 @@ double Kp2 = 0.25;//.4
 double Ki2 = 0.0;
 double Kd2 = 0.0;//.037
 
-//if (abs(pitch - DesiredPitch) > 35) {
-  //NSPID.SetTunings( , , );
-  
-  
-
-PID NSPID(&pitch2, &NSComplement, &DesiredPitch, NWKpHard, NWKiHard, NWKdHard, REVERSE);
+PID NSPID(&pitch, &NSComplement, &DesiredPitch, NWKpHard, NWKiHard, NWKdHard, REVERSE);
 PID WEPID(&roll, &WEComplement, &DesiredRoll, Kp2, Ki2, Kd2, REVERSE);
-
-
 
 void setupPIDs() {
   NSPID.SetMode(AUTOMATIC);
@@ -65,10 +58,7 @@ void computePIDS() {
   WEPID.Compute();
 }
 
-int neg;
-
 void Hover() {
-  pitch2 = pitch * abs(pitch);
 //  if(abs(pitch) > 25) NSPID.SetTunings(NWKpHard, NWKiHard, NWKdHard);
 //  else if(abs(pitch) > 10) NSPID.SetTunings(NWKpMedium, NWKiMedium, NWKdMedium);
 //  else 
