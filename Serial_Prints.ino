@@ -1,10 +1,11 @@
 unsigned long PrintTracker;
-unsigned int MilliPrintTime = 150; // Time between prints in milliseconds
+unsigned int MilliPrintTime = 1; // Time between prints in milliseconds
 
 void printValues() {
-  if(millis() >= PrintTracker) {
+  if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-    MATLABGraph();
+    PitchRoll();
+    Theta();
     Serial.println();
   }
 }
@@ -63,12 +64,12 @@ void LevelAccelTilts() {
   Serial.print(" LevelRoll:"); Serial.print(LevelRoll);
 }
 
-void PIDSerovOutputs() {
-  Serial.print(" NwT:"); Serial.print(NwT);
-  Serial.print(" SwT:"); Serial.print(SwT);
-  Serial.print(" SeT:"); Serial.print(SeT);
-  Serial.print(" NeT:"); Serial.print(NeT);
-}
+//void PIDSerovOutputs() {
+//  Serial.print(" NwT:"); Serial.print(NwT);
+//  Serial.print(" SwT:"); Serial.print(SwT);
+//  Serial.print(" SeT:"); Serial.print(SeT);
+//  Serial.print(" NeT:"); Serial.print(NeT);
+//}
 
 void DPS() {
   Serial.print(" xdps:"); Serial.print(xdps);
@@ -88,10 +89,9 @@ void fPitchRoll() {
 }
 
 void MATLABGraph() {
-  Serial.print("       "); Serial.print(fpitch);
-  Serial.print("       "); Serial.print(froll);
-  Serial.print("       "); Serial.print(pitch);
-  Serial.print("       "); Serial.print(roll);
+  Serial.print("       "); Serial.print(thetaX);
+  Serial.print("       "); Serial.print(0);
+  Serial.print("       "); Serial.print(0);
   Serial.print("       "); Serial.print(millis());
 }
 
@@ -102,29 +102,31 @@ void Accel() {
   Serial.print(" az:"); Serial.print(az);
 }
 
-void Accel2() {
-  Serial.print(" ax2:"); Serial.print(ax2);
-  Serial.print(" ay2:"); Serial.print(ay2);
-  Serial.print(" az2:"); Serial.print(az2);
-  Serial.print(" thetaX2:"); Serial.print(thetaX2);
-  Serial.print(" thetaY2:"); Serial.print(thetaY2);
-  Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
+void AccelandGyro() {
+  Serial.print("  gx:"); Serial.print(gx);
+  Serial.print("  thetaX:"); Serial.print(thetaX);
+  Serial.print("  gy:"); Serial.print(gy);
+  Serial.print("  thetaY:"); Serial.print(thetaY);
+  Serial.print("  gz:"); Serial.print(gz);
+  Serial.print("  thetaZ:"); Serial.print(thetaZ);
+  Serial.print(" pitch:"); Serial.print(pitch);
+  Serial.print("     roll:"); Serial.print(roll);
 }
 
 void Theta() {
   Serial.print(" thetaX:"); Serial.print(thetaX);
   Serial.print(" thetaY:"); Serial.print(thetaY);
-  Serial.print(" thetaZ:"); Serial.print(thetaZ);
-  //Serial.print(" thetaX2:"); Serial.print(thetaX2);
-  //Serial.print(" thetaY2:"); Serial.print(thetaY2);
-  //Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
+//  Serial.print(" thetaZ:"); Serial.print(thetaZ);
+//  Serial.print(" thetaX2:"); Serial.print(thetaX2);
+//  Serial.print(" thetaY2:"); Serial.print(thetaY2);
+//  Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
 }
 
-void pidvalues() {
-  Serial.print(" pitch:"); Serial.print(pitch);
-  Serial.print("     NSComplement:"); Serial.print(NSComplement);
-  Serial.print("     roll:"); Serial.print(roll);
-  Serial.print("     WEComplement:"); Serial.print(WEComplement);
-  Serial.print("     North Motor:"); Serial.print((HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2));
-  Serial.print("     South Motor:"); Serial.print((HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2));
-}
+//void pidvalues() {
+//  Serial.print(" pitch:"); Serial.print(pitch);
+//  Serial.print("     NSComplement:"); Serial.print(NSComplement);
+//  Serial.print("     roll:"); Serial.print(roll);
+//  Serial.print("     WEComplement:"); Serial.print(WEComplement);
+//  Serial.print("     North Motor:"); Serial.print((HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2));
+//  Serial.print("     South Motor:"); Serial.print((HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2));
+//}

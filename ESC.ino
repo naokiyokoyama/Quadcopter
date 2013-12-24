@@ -19,31 +19,42 @@ void setupMotors() {
 
 void testSimple() {
   North.write(90);
-  West.write(10);
+  West.write(90);
   South.write(90);
-  East.write(10);
+  East.write(90);
 }
 
+void testDrive() {
+  int stickinput = RightVertical() * 14 / 100;
+  
+  if(stickinput>120) stickinput=120;
+  if(stickinput<30) stickinput=30;
+  
+  North.write(stickinput);
+  West.write(stickinput);
+  South.write(stickinput);
+  East.write(stickinput);
+}
+
+
 void triggerSTOP() {
-  //if(RightHorizontal > 480) {STOP = true;}
-  if(RightVertical() < -100) {STOP = true;}
-  //if(thetaZ < 10.0) {STOP = true;}
-//  if(StopPoints == StopTarget) {STOP = true;}
-//  if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
-//    StopTracker = millis();
-//    lastPivot = zdps;
-//    StopBegun = true;
-//    StopPoints = 1;
-//  }
-//  if((StopBegun && millis() - StopTracker < MilliStopperTime) && ((lastPivot < 0 && zdps > PivotSpeedThreshold) || (lastPivot > 0 && zdps < -1 * PivotSpeedThreshold))) {
-//    StopPoints++;
-//    lastPivot = zdps;
-//    StopTracker = millis();
-//  }
-//  if(StopBegun && millis() - StopTracker >= MilliStopperTime) {
-//    StopBegun = false;
-//    StopPoints = 0;
-//  }
+  if(LeftHorizontal() < -300) {STOP = true;}
+  if(StopPoints == StopTarget) {STOP = true;}
+  if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
+    StopTracker = millis();
+    lastPivot = zdps;
+    StopBegun = true;
+    StopPoints = 1;
+  }
+  if((StopBegun && millis() - StopTracker < MilliStopperTime) && ((lastPivot < 0 && zdps > PivotSpeedThreshold) || (lastPivot > 0 && zdps < -1 * PivotSpeedThreshold))) {
+    StopPoints++;
+    lastPivot = zdps;
+    StopTracker = millis();
+  }
+  if(StopBegun && millis() - StopTracker >= MilliStopperTime) {
+    StopBegun = false;
+    StopPoints = 0;
+  }
 }
 
 

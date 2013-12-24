@@ -9,7 +9,7 @@ double rollin = 0.0;
 double pitchin = 0.0;//-48.4;
 
 double p = 0.256; //.36
-double i = 0.9527812;
+double i = 0.7;//0.9527812;
 double d = 0.07;
 double period = 1.379;
 
@@ -24,7 +24,18 @@ void MITPID() {
    if(LeftVertical() < -400) pitchin = -30.0;
    else pitchin = -15.0; 
   }
-  else pitchin = 0.0;
+  else pitchin = LevelPitch;
+
+  rollin = 0.0;
+  pitchin = 0.0;
+  
+  if(abs(pitch - pitchin) < 1.3) pitch = pitchin;
+  if(abs(roll - rollin) < 1.3) roll = rollin;
+  
+  HoverThrottle2 = RightVertical() * 14 / 100;
+  
+  if(HoverThrottle2>120) HoverThrottle2=120;
+  if(HoverThrottle2<30) HoverThrottle2=30;
   
   deltaPID();
   
@@ -33,6 +44,8 @@ void MITPID() {
     if(speeds[x]<MinWave2) speeds[x]=MinWave2;
   }
   
+  East.write(speeds[0]);
+  West.write(speeds[1]);
   North.write(speeds[2]);
   South.write(speeds[3]);
 }
@@ -45,10 +58,19 @@ void simplePD() {
 }
 
 void deltaPID() {
-  droll = (roll - oldroll)/ ( (double) MicrosPassed / 1000000.0);
-  dpitch = (pitch - oldpitch)/ ( (double) MicrosPassed / 1000000.0);
-  iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
-  ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
+//  droll = (roll - oldroll)/ ( (double) MicrosPassed / 1000000.0);
+//  dpitch = (pitch - oldpitch)/ ( (double) MicrosPassed / 1000000.0);
+  
+  droll = xdps;
+  dpitch = ydps;
+  
+  if(pitchin != pitch){
+    iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
+  }
+  if(rollin !=roll){
+    ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
+  }
+  
   speeds[0] = HoverThrottle2 - p*(roll - rollin) - i*iroll - d*droll;
   speeds[1] = HoverThrottle2 + p*(roll - rollin) + i*iroll + d*droll;
   speeds[2] = HoverThrottle2 - p*(pitch - pitchin) - i*ipitch - d*dpitch;

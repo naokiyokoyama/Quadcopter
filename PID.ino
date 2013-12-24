@@ -1,81 +1,85 @@
-
-int MaxWave = 110;
-int HoverThrottle = MaxWave - 50;
-
-double DesiredPitch = 0.0;
-double DesiredRoll = 0.0;
-
-double NSComplement, WEComplement;
-
-//double NWKpSoft = 0.5;//.4
-//double NWKiSoft = 0.0;
-//double NWKdSoft = 0.035;//.037
 //
-//double NWKpMedium = 0.9;//.4
-//double NWKiMedium = 0.0;
-//double NWKdMedium = 0.046;//.037
+//int speedsPID[4];
 //
-//double NWKpHard = 1.111;//1.111
-//double NWKiHard = 0.0;
-//double NWKdHard = 0.06;//.04
+//int MaxWave = 179;
+//int MinWave = 40;
+//int HoverThrottle = 10;
 //
-//double Kp2 = 0.25;//.4
-//double Ki2 = 0.0;
-//double Kd2 = 0.0;//.037
-
-double NWKpSoft = 0.5;//.4
-double NWKiSoft = 0.0;
-double NWKdSoft = 0.035;//.037
-
-double NWKpMedium = 0.9;//.4
-double NWKiMedium = 0.0;
-double NWKdMedium = 0.046;//.037
-
-double NWKpHard = 1.111;//1.111
-double NWKiHard = 0.0;
-double NWKdHard = 0.06;//.04
-
-double Kp2 = 0.25;//.4
-double Ki2 = 0.0;
-double Kd2 = 0.0;//.037
-
-PID NSPID(&pitch, &NSComplement, &DesiredPitch, NWKpHard, NWKiHard, NWKdHard, REVERSE);
-PID WEPID(&roll, &WEComplement, &DesiredRoll, Kp2, Ki2, Kd2, REVERSE);
-
-void setupPIDs() {
-  NSPID.SetMode(AUTOMATIC);
-  WEPID.SetMode(AUTOMATIC);
-  NSPID.SetSampleTime(5);
-  WEPID.SetSampleTime(5);
-  NSPID.SetOutputLimits((MaxWave - HoverThrottle) / -2, (MaxWave - HoverThrottle) / 2);
-  WEPID.SetOutputLimits((MaxWave - HoverThrottle) / -2, (MaxWave - HoverThrottle) / 2);
-}
-
-double NwT, SwT, SeT, NeT;
-
-void computePIDS() {
-  NSPID.Compute();
-  WEPID.Compute();
-}
-
-void Hover() {
-//  if(abs(pitch) > 25) NSPID.SetTunings(NWKpHard, NWKiHard, NWKdHard);
-//  else if(abs(pitch) > 10) NSPID.SetTunings(NWKpMedium, NWKiMedium, NWKdMedium);
-//  else 
-  NSPID.SetTunings(NWKpSoft, NWKiSoft, NWKdSoft);
-  computePIDS();
-  North.write(HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2);
-  //North.write(110);
-  //East.write(HoverThrottle - WEComplement + (MaxWave - HoverThrottle) / 2);
-  East.write(10);
-  South.write(HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2);
-  //South.write(110);
-  //West.write(HoverThrottle + WEComplement + (MaxWave - HoverThrottle) / 2);
-  West.write(10);
-}
-
-void checkPairRatio() {
-  //North.write(MaxWave);South.write(HoverThrottle);
-  North.write(95);South.write(75);
-}
-  
+//double DesiredPitch = 0.0;
+//double DesiredRoll = 0.0;
+//
+//double NSComplement, WEComplement;
+//
+//double p = 0.3;
+//double i = 0.0;
+//double d = 0.0;
+//
+//double period = 2.3;
+//
+//PID NSPID(&pitch, &NSComplement, &DesiredPitch, p, i, d, REVERSE);
+//PID WEPID(&roll, &WEComplement, &DesiredRoll, p, i, d, REVERSE);
+//
+//void setupPIDs() {
+//  NSPID.SetMode(AUTOMATIC);
+//  WEPID.SetMode(AUTOMATIC);
+//  NSPID.SetSampleTime(1);
+//  WEPID.SetSampleTime(1);
+//  NSPID.SetOutputLimits(-169, 169);
+//  WEPID.SetOutputLimits(-169, 169);
+//}
+//
+//void Hover() {
+//  HoverThrottle = RightVertical() * 14 / 100;
+//  
+//  NSPID.SetTunings(p, i, d);
+//  WEPID.SetTunings(p, i, d);
+//  
+//  NSPID.Compute();
+//  WEPID.Compute();
+//  
+//  speedsPID[0] = HoverThrottle - WEComplement;
+//  speedsPID[1] = HoverThrottle + WEComplement;
+//  speedsPID[2] = HoverThrottle - NSComplement;
+//  speedsPID[3] = HoverThrottle + NSComplement;
+//  
+//  for(int x=0; x<4; x++) {
+//    if(speedsPID[x]>MaxWave) speedsPID[x]=MaxWave;
+//    if(speedsPID[x]<MinWave) speedsPID[x]=MinWave;
+//  }
+//  
+//  East.write(speedsPID[0]);
+//  West.write(speedsPID[1]);
+//  North.write(speedsPID[2]);
+//  South.write(speedsPID[3]);
+//}
+//
+//void checkPairRatio() {
+//  //North.write(MaxWave);South.write(HoverThrottle);
+//  North.write(95);South.write(75);
+//}
+//  
+//void SetTuningsClassicPID() {
+// p = 0.6 * p;
+// i = 2.0 * p / period;
+// d = p * period / 8.0;
+//}
+//
+//void SetTuningsPessenIntegralRule() {
+// p = 0.7 * p;
+// i = 2.5 * p / period;
+// d = p * period * 0.15;
+//}
+//
+//void SetTuningsSomeOvershoot() {
+// p = 0.33 * p;
+// i = 2.0 * p / period;
+// d = p * period / 3.0;
+//}
+//
+//void SetTuningsNoOvershoot() {
+// p = 0.2 * p;
+// i = 2.2 * p / period;
+// d = p * period / 8.0;
+//}
+// 
+// 

@@ -10,11 +10,12 @@ Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 
 // Variables created to measure time passed
 unsigned long MicrosPassed;         // Amount of time taken to run the last loop
-unsigned long MicrosPassedPresent;  // Currently not being used
 unsigned long MicrosTracker;        // Value in which the current time is stored to compute the time passed
 unsigned long MillisTracker;        // Value in which the current time is stored to compute the time passed
 unsigned long LoopTracker;          // Value in which the current time is stored to compute the time passed
 unsigned int LoopTime;              // Time the loop takes in milliseconds
+
+boolean printing = false;
 
 // ESC 
 boolean STOP = false;               // When this boolean is false, the motors permanently stop running
@@ -53,9 +54,8 @@ float xdps, ydps, zdps;                  // Degrees per second calculated for ev
 float xdps1, ydps1, zdps1;               // DPS from the last loop to be used for the Trapezoidal Rule
 float gx, gy, gz;                        // Intgrated angle values
 
-float SC = 0.069657  ;                   // Scale factor in dps/LSB
+float SC = 0.069657;                   // Scale factor in dps/LSB
 int xRm, yRm, zRm;                       // Raw measurements from the gyroscope
-int xRm1, yRm1, zRm1, xRm2, yRm2, zRm2;  
 int xRo, yRo, zRo;                       // Zero rate level angles, or byte values when there is no angular velocity present
 int xRth = 20;                           // Threshold for gyroscope byte values to reduce ambient noise
 int yRth = 20;
@@ -71,31 +71,35 @@ int MilliCalibrationTime = 100;        // Time provided for calibration (Gyro, r
 
 int AccelAddress = 25; 
 
-double ax, ay, az, ar, thetaX, thetaY, thetaZ;  
+double ax, ay, az, ar, thetaX, thetaY, thetaZ; 
+double fax, fay, faz;
+double ffax, ffay, ffaz;
 double ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; // After transformation
 double fthetaY, fthetaX;
 
 // ANGLES
-const double CFRatio = .98;
+const double CFRatio = 0.98;
 double pitch, roll, yaw;
 double fpitch, froll, fyaw;
-double oldpitch, oldroll, oldyaw;
+double oldpitch, oldroll, oldyaw; 
+double LevelPitch, LevelRoll;
 
 // RECEIVER
 volatile boolean LeftToggle, RightToggle;
 
+
+
+
+
+
+
 void setup() {
   Wire.begin();
-  //Serial.begin(9600);
+  //Serial.begin(9600); printing = true;
   
   // Attach pin numbers for servo functions
   setupMotors();
-  setupRatiosVector();
-  //SetTuningsClassicPID();
-  //SetTuningsPessenIntegralRule();
-  //SetTuningsSomeOvershoot();
-  //SetTuningsNoOvershoot();
-  
+
   // Ensure communication is established between the I2C slaves and the Arduino
   while(!accel.begin() || !mag.begin()){}
   delay(300);
@@ -108,9 +112,9 @@ void setup() {
   // While the quadcopter is still, it calibrates the gyroscope and uses the accelerometer find the inital pitch and roll
   ZeroRateLevelCalibration();                // Creates xRo, yRo, zRo
   getAccelValues();
-  pitch = thetaY; 
-  roll = thetaX;
-  
+  ar = sqrt(ax*ax + ay*ay + az*az);
+  roll = 90.0 - (acos(ax/ar)*(180.0/PI));
+  pitch = 90.0 - (acos(ay/ar)*(180.0/PI));
   setupReceiverInterrupts();
   
   // Until ample time has passed for the ESC to start-up, keep measuring and calculating the quadcopter's tilts
@@ -124,9 +128,9 @@ void setup() {
     gy = DeltaTrapezoidalRule(ydps1, ydps);
     gz = DeltaTrapezoidalRule(zdps1, zdps);
     getAccelValues();                         // Computes acceleration and tilt in each axis
+    getAccelAngles(ax, ay, az);
     ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
-    reduceNoise();
-    //printValues();
+    printValues();
     MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
   }
 }
@@ -142,20 +146,20 @@ void loop() {
   gy = DeltaTrapezoidalRule(ydps1, ydps);
   gz = DeltaTrapezoidalRule(zdps1, zdps);
   getAccelValues();                         // Computes acceleration and tilt in each axis
+  simpleMovingAverageAccel();
+  getAccelAngles(fax, fay, faz);
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   ESCFunctions(); 
-  reduceNoise();
-  //printValues();
+  printValues();
   MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
-  
-  
 }  
 void ESCFunctions() {
   if(!STOP) {
     MITPID();
-    //Hover();
-    //checkPairRatio();
-    //testSimple();
+//    Hover();
+//    checkPairRatio();
+//    testSimple();
+//    testDrive();
     triggerSTOP();
   }
   else {
@@ -163,8 +167,8 @@ void ESCFunctions() {
     West.write(ESCMin);
     South.write(ESCMin);
     East.write(ESCMin);
-    //while(1 == 1) {}
-    if(RightVertical() > 100) {STOP = false;}
+//    while(1 == 1) {}
+    if(LeftHorizontal() > 300) {STOP = false;}
   }
 }
 

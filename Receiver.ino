@@ -1,10 +1,10 @@
 //VARIABLES
 
 // Interrupt Pins
-const int Ch1 = 5;                 // Pin 18
-const int Ch2 = 4;                 // Pin 19
-const int Ch3 = 0;                 // Pin 2
-const int Ch4 = 1;                 // Pin 3
+const int Ch1 = 5;                 // Pin 18, right horizontal
+const int Ch2 = 4;                 // Pin 19, right vertical
+const int Ch3 = 0;                 // Pin 2, left vertical
+const int Ch4 = 1;                 // Pin 3, left horizontal
 
 volatile unsigned long CalibrateRxTracker, riseCh1, riseCh2, riseCh3, riseCh4;
 volatile int RightHorizontalVolatile, LeftVerticalVolatile, RightVerticalVolatile, LeftHorizontalVolatile;
@@ -33,7 +33,7 @@ int LeftToggleSwitches, RightToggleSwitches;
 
 // INTERRUPT FUNCTIONS (must be ISRs that do not accept any parameters)
 
-void startInterupts() {
+void startInterrupts() {
   attachInterrupt(Ch1, risingCh1Signal, RISING);
   attachInterrupt(Ch2, risingCh2Signal, RISING);
   attachInterrupt(Ch3, risingCh3Signal, RISING);
@@ -127,7 +127,7 @@ int LeftHorizontal() {
 // SETUP FUNCTIONS
 
 void setupReceiverInterrupts() {
-  attachInterrupt(Ch1, startInterupts, RISING);
+  attachInterrupt(Ch1, startInterrupts, RISING);
 }
 
 void CalibrateIdleReceiverValues() {
