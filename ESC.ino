@@ -38,7 +38,7 @@ void testDrive() {
 
 
 void triggerSTOP() {
-  if(LeftHorizontal() < -300) {STOP = true;}
+  if(LeftToggle) {STOP = true;}
   if(StopPoints == StopTarget) {STOP = true;}
   if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
     StopTracker = millis();

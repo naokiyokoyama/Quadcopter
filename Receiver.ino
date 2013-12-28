@@ -7,7 +7,7 @@ const int Ch3 = 0;                 // Pin 2, left vertical
 const int Ch4 = 1;                 // Pin 3, left horizontal
 
 volatile unsigned long CalibrateRxTracker, riseCh1, riseCh2, riseCh3, riseCh4;
-volatile int RightHorizontalVolatile, LeftVerticalVolatile, RightVerticalVolatile, LeftHorizontalVolatile;
+
 
 int cloops;
 unsigned long int ch1s, ch2s, ch3s, ch4s; 
@@ -21,15 +21,6 @@ const int Ch6 = 23;                 // Pin 3
 
 boolean calibrate = false;
 boolean calibrated = false;
-boolean receiverBegun = false;
-unsigned long ReceiverTracker;
-int ReceiverSamplingTime = 700;
-unsigned int Ch5Sum, Ch6Sum;
-boolean lastLeftToggle = false;
-boolean lastRightToggle = false;
-boolean LeftToggleChanged = false;
-boolean RightToggleChanged = false;
-int LeftToggleSwitches, RightToggleSwitches;
 
 // INTERRUPT FUNCTIONS (must be ISRs that do not accept any parameters)
 
@@ -63,6 +54,23 @@ void calibrateRxLoop() {
     calibrate = false;
     calibrated = true;
   }
+  if(calibrated){
+    static unsigned long RxTracker;
+    if(millis() > RxTracker + 700){
+      RxTracker = millis();
+      int pulse = pulseIn(Ch5, HIGH);
+      if(pulse > 1700) 
+      LeftToggle = true;
+      else if (pulse < 1300)
+      LeftToggle = false; 
+      
+      pulse = pulseIn(Ch6, HIGH);
+      if(pulse > 1700) 
+      RightToggle = true;
+      else if (pulse < 1300)
+      RightToggle = false;
+    }
+  } 
 }
 void risingCh1Signal() {
   attachInterrupt(Ch1, fallingCh1Signal, FALLING);
@@ -154,40 +162,4 @@ void CalibrateIdleReceiverValues2() {
   LeftHorizontalZero = LeftHorizontalVolatile;
 }
 
-// MAIN LOOP FUNCTIONS
 
-void receiveCh5Ch6Signal() {
-  if(!receiverBegun) {
-    receiverBegun = true;
-    ReceiverTracker = millis();
-  }
-  if(receiverBegun) {
-    if (millis() < ReceiverTracker + ReceiverSamplingTime) {
-      Ch5Sum += digitalRead(Ch5);
-      Ch6Sum += digitalRead(Ch6);
-    }
-    else {
-      //leftwave = Ch5Sum; rightwave = Ch6Sum;
-      if(Ch5Sum < 9)
-      {LeftToggle = false;}
-      else {LeftToggle = true;}
-      if(Ch6Sum < 9)
-      {RightToggle = false;}
-      else {RightToggle = true;}
-      Ch5Sum = 0;
-      Ch6Sum = 0;
-      receiverBegun = false;
-    }
-  }
-}
-
-void countToggleSwitching() {
-  if(lastLeftToggle != LeftToggle)
-  {LeftToggleChanged = true; LeftToggleSwitches++;}
-  else {LeftToggleChanged = false;}
-  if(lastRightToggle != RightToggle)
-  {RightToggleChanged = true; RightToggleSwitches++;}
-  else {RightToggleChanged = false;}
-  lastLeftToggle = LeftToggle;
-  lastRightToggle = RightToggle;
-}

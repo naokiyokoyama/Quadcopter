@@ -24,21 +24,21 @@ void getGyroDPS(int XRM, int YRM, int ZRM) {
   int dR;
   if(abs(XRM - xRo) > xRth) {
     dR = XRM - xRo;
-    xdps = SC * (float)dR;
+    xdps = SC * (float)dR - (float)xRo;
   }
   else
   {xdps = 0;}
   
   if(abs(YRM - yRo) > yRth) {
     dR = YRM - yRo;
-    ydps = SC * (float)dR;
+    ydps = SC * (float)dR - (float)yRo;
   }
   else
   {ydps = 0;}
   
   if(abs(ZRM - zRo) > zRth) {
     dR = ZRM - zRo;
-    zdps = SC * (float)dR;
+    zdps = SC * (float)dR -  - (float)zRo;
   }
   else
   {zdps = 0;}

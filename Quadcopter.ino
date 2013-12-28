@@ -56,74 +56,62 @@ float gx, gy, gz;                        // Intgrated angle values
 
 float SC = 0.069657;                   // Scale factor in dps/LSB
 int xRm, yRm, zRm;                       // Raw measurements from the gyroscope
-int xRo, yRo, zRo;                       // Zero rate level angles, or byte values when there is no angular velocity present
+int xRo = -1;                       // Zero rate level angles, or byte values when there is no angular velocity present
+int yRo = -1;
+int zRo = 2;
 int xRth = 20;                           // Threshold for gyroscope byte values to reduce ambient noise
 int yRth = 20;
 int zRth = 20; 
 
 // Variables used to calibrate the zero rate level angles
 
-int MilliCalibrationTime = 100;        // Time provided for calibration (Gyro, receiver) in milliseconds   
+int MilliCalibrationTime = 200;        // Time provided for calibration (Gyro, receiver) in milliseconds   
 
 // ACCELEROMETER 
-
-#define CTRL_REG2_A 0x21
-
 int AccelAddress = 25; 
 
 double ax, ay, az, ar, thetaX, thetaY, thetaZ; 
 double fax, fay, faz;
-double ffax, ffay, ffaz;
-double ax2, ay2, az2, ar2, thetaX2, thetaY2, thetaZ2; // After transformation
-double fthetaY, fthetaX;
 
 // ANGLES
 const double CFRatio = 0.98;
 double pitch, roll, yaw;
-double fpitch, froll, fyaw;
 double oldpitch, oldroll, oldyaw; 
 double LevelPitch, LevelRoll;
 
 // RECEIVER
-volatile boolean LeftToggle, RightToggle;
+boolean LeftToggle, RightToggle;
+volatile int RightHorizontalVolatile, LeftVerticalVolatile, RightVerticalVolatile, LeftHorizontalVolatile;
 
-
-
-
-
+//NOISE REDUCTION
+const int samples = 18;
+double axRm[samples];  // Contains past values in order to filter out noise, with [0] being the most recent
+double ayRm[samples];
+double azRm[samples];
+double axsum, aysum, azsum;
+int axindex, ayindex, azindex;
 
 
 void setup() {
   Wire.begin();
-  //Serial.begin(9600); printing = true;
-  
-  // Attach pin numbers for servo functions
-  setupMotors();
-
-  // Ensure communication is established between the I2C slaves and the Arduino
-  while(!accel.begin() || !mag.begin()){}
-  delay(300);
-  
-  // Setup certain registers on the accelerometer and gyroscope
-  writeI2C(AccelAddress, CTRL_REG2_A, 0b01111011);
-  itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_0)); //Set the gyroscope scale for the outputs to +/-2000 degrees per second
-  itgWrite(itgAddress, SMPLRT_DIV, 9);       // Set the sample rate to 100 hz
-  
-  // While the quadcopter is still, it calibrates the gyroscope and uses the accelerometer find the inital pitch and roll
-  ZeroRateLevelCalibration();                // Creates xRo, yRo, zRo
-  getAccelValues();
+//  Serial.begin(9600); printing = true;
+  setupMotors();                              // Attaches each motor to its appropriate pin and sends them the minimum wave
+  while(!accel.begin() || !mag.begin()){}     // Waits until the accelerometer is found
+  delay(300);                                 // Makes sure that the sensors have been properly initialized
+  itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_1)); //Sets the gyroscope scale for the outputs to +/-2000 degrees per second
+  itgWrite(itgAddress, SMPLRT_DIV, 9);        // Sets the sample rate to 100 hz
+//  ZeroRateLevelCalibration();                // Creates xRo, yRo, zRo
+  getAccelValues();                           // Uses the accelerometer to calculate the inital angles before movement
   ar = sqrt(ax*ax + ay*ay + az*az);
   roll = 90.0 - (acos(ax/ar)*(180.0/PI));
   pitch = 90.0 - (acos(ay/ar)*(180.0/PI));
   setupReceiverInterrupts();
-  
-  // Until ample time has passed for the ESC to start-up, keep measuring and calculating the quadcopter's tilts
   while(millis() < 6000) {
     calibrateRxLoop();
     MicrosTracker = micros(); 
     getGyroValues();                          // Computes Rm for each axis                     
-    logOldDPS();                              // Saves the DPS values from the last loop before they are updated, for the Trapezoidal Rule
-    getGyroDPS(xRm, yRm, zRm);                // Converts nRm values into ndps (multiply by SC, threshold filtering)
+    logOldDPS();                              // Saves the Dps values from the last loop before they are updated, for the Trapezoidal Rule
+    getGyroDPS(xRm, yRm, zRm);                // Converts Rm values into dps (multiply by SC, threshold filtering)
     gx = DeltaTrapezoidalRule(xdps1, xdps);
     gy = DeltaTrapezoidalRule(ydps1, ydps);
     gz = DeltaTrapezoidalRule(zdps1, zdps);
@@ -136,17 +124,19 @@ void setup() {
 }
 
 void loop() {  
-  // LoopTime = millis() - LoopTracker;  LoopTracker = millis();
+  LoopTime = millis() - LoopTracker;  LoopTracker = millis();
   MicrosTracker = micros(); 
   calibrateRxLoop();
   getGyroValues();                          // Computes Rm for each axis                     
   logOldDPS();                              // Saves the DPS values from the last loop before they are updated, for the Trapezoidal Rule
-  getGyroDPS(xRm, yRm, zRm);                // Converts nRm values into ndps (multiply by SC, threshold filtering)
+  getGyroDPS(xRm, yRm, zRm);                // Converts Rm values into dps (multiply by SC, threshold filtering, drift compensation)
   gx = DeltaTrapezoidalRule(xdps1, xdps);
   gy = DeltaTrapezoidalRule(ydps1, ydps);
   gz = DeltaTrapezoidalRule(zdps1, zdps);
-  getAccelValues();                         // Computes acceleration and tilt in each axis
-  simpleMovingAverageAccel();
+  getAccelValues();                         // Computes acceleration in each axis
+  fax = simpleMovingAverage(ax, axsum, axRm);
+  fay = simpleMovingAverage(ay, aysum, ayRm);
+  faz = simpleMovingAverage(az, azsum, azRm);
   getAccelAngles(fax, fay, faz);
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
   ESCFunctions(); 
@@ -157,7 +147,6 @@ void ESCFunctions() {
   if(!STOP) {
     MITPID();
 //    Hover();
-//    checkPairRatio();
 //    testSimple();
 //    testDrive();
     triggerSTOP();
@@ -167,8 +156,7 @@ void ESCFunctions() {
     West.write(ESCMin);
     South.write(ESCMin);
     East.write(ESCMin);
-//    while(1 == 1) {}
-    if(LeftHorizontal() > 300) {STOP = false;}
+    if(LeftToggle) {STOP = false;}
   }
 }
 

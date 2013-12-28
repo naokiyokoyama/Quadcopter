@@ -3,18 +3,18 @@
 //
 //int MaxWave = 179;
 //int MinWave = 40;
-//int HoverThrottle = 10;
+//int HoverThrottle;
 //
-//double DesiredPitch = 0.0;
-//double DesiredRoll = 0.0;
+//double DesiredPitch;
+//double DesiredRoll;
 //
 //double NSComplement, WEComplement;
 //
-//double p = 0.3;
+//double p = 0.23;
 //double i = 0.0;
 //double d = 0.0;
 //
-//double period = 2.3;
+//double period = 1.31;
 //
 //PID NSPID(&pitch, &NSComplement, &DesiredPitch, p, i, d, REVERSE);
 //PID WEPID(&roll, &WEComplement, &DesiredRoll, p, i, d, REVERSE);
@@ -37,10 +37,10 @@
 //  NSPID.Compute();
 //  WEPID.Compute();
 //  
-//  speedsPID[0] = HoverThrottle - WEComplement;
-//  speedsPID[1] = HoverThrottle + WEComplement;
-//  speedsPID[2] = HoverThrottle - NSComplement;
-//  speedsPID[3] = HoverThrottle + NSComplement;
+//  speedsPID[0] = HoverThrottle - (int)WEComplement;
+//  speedsPID[1] = HoverThrottle + (int)WEComplement;
+//  speedsPID[2] = HoverThrottle - (int)NSComplement;
+//  speedsPID[3] = HoverThrottle + (int)NSComplement;
 //  
 //  for(int x=0; x<4; x++) {
 //    if(speedsPID[x]>MaxWave) speedsPID[x]=MaxWave;
@@ -49,13 +49,8 @@
 //  
 //  East.write(speedsPID[0]);
 //  West.write(speedsPID[1]);
-//  North.write(speedsPID[2]);
-//  South.write(speedsPID[3]);
-//}
-//
-//void checkPairRatio() {
-//  //North.write(MaxWave);South.write(HoverThrottle);
-//  North.write(95);South.write(75);
+////  North.write(speedsPID[2]);
+////  South.write(speedsPID[3]);
 //}
 //  
 //void SetTuningsClassicPID() {
@@ -79,7 +74,7 @@
 //void SetTuningsNoOvershoot() {
 // p = 0.2 * p;
 // i = 2.2 * p / period;
-// d = p * period / 8.0;
+//// d = p * period / 8.0;
 //}
 // 
 // 

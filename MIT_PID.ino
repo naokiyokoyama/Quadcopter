@@ -8,33 +8,29 @@ int HoverThrottle2 = 100;  // Speed of motor when level
 double rollin = 0.0;
 double pitchin = 0.0;//-48.4;
 
-double p = 0.256; //.36
-double i = 0.7;//0.9527812;
-double d = 0.07;
+double p = 0.5538;//0.6; //.36
+double i = 0.852;//0.099;//0.9527812;
+double d = 0.09;//0.11;//1444 900 2020 0 1000
+
+double yp = 0.197; //.36
+double yd = 0.03;
+
 double period = 1.379;
 
 double droll, iroll, dpitch, ipitch;
 
 void MITPID() {
-  if(LeftVertical() > 250) {
-   if(LeftVertical() > 400) pitchin = 30.0;
-   else pitchin = 15.0; 
-  }
-  else if (LeftVertical() < -250) {
-   if(LeftVertical() < -400) pitchin = -30.0;
-   else pitchin = -15.0; 
-  }
-  else pitchin = LevelPitch;
+  pitchin = double(map(LeftVertical(), -500, 500, -15, 15) * 2);
+  rollin = double(map(LeftHorizontal(), -500, 500, -15, 15) * 2);
+  
+  HoverThrottle2 = map(RightVertical(), 0, 1010, 30, 150);
 
-  rollin = 0.0;
-  pitchin = 0.0;
+//  HoverThrottle2 = 120;
   
-  if(abs(pitch - pitchin) < 1.3) pitch = pitchin;
-  if(abs(roll - rollin) < 1.3) roll = rollin;
+//  p = double(map(RightVerticalVolatile, 900, 2020, 2000, 3500)) / 1000.0;
   
-  HoverThrottle2 = RightVertical() * 14 / 100;
-  
-  if(HoverThrottle2>120) HoverThrottle2=120;
+//  if(p<0) p = 0.0;
+
   if(HoverThrottle2<30) HoverThrottle2=30;
   
   deltaPID();
@@ -50,19 +46,14 @@ void MITPID() {
   South.write(speeds[3]);
 }
 
-void simplePD() {
-  speeds[0] = HoverThrottle2 - p*(roll - rollin) - d*xdps;
-  speeds[1] = HoverThrottle2 - p*(rollin - roll) + d*xdps;
-  speeds[2] = HoverThrottle2 - p*(pitch - pitchin) - d*ydps;
-  speeds[3] = HoverThrottle2 - p*(pitchin - pitch) + d*ydps;
-}
-
 void deltaPID() {
 //  droll = (roll - oldroll)/ ( (double) MicrosPassed / 1000000.0);
 //  dpitch = (pitch - oldpitch)/ ( (double) MicrosPassed / 1000000.0);
   
   droll = xdps;
   dpitch = ydps;
+  
+  double dyaw = (zdps - zdps1)/( (double) MicrosPassed / 1000000.0);
   
   if(pitchin != pitch){
     iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
@@ -71,10 +62,17 @@ void deltaPID() {
     ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
   }
   
-  speeds[0] = HoverThrottle2 - p*(roll - rollin) - i*iroll - d*droll;
-  speeds[1] = HoverThrottle2 + p*(roll - rollin) + i*iroll + d*droll;
-  speeds[2] = HoverThrottle2 - p*(pitch - pitchin) - i*ipitch - d*dpitch;
-  speeds[3] = HoverThrottle2 + p*(pitch - pitchin) + i*ipitch + d*dpitch;
+  speeds[0] = int(double(HoverThrottle2) - p*(roll - rollin) - i*iroll - d*droll + yp*zdps + yd*dyaw);
+  speeds[1] = int(double(HoverThrottle2) + p*(roll - rollin) + i*iroll + d*droll + yp*zdps + yd*dyaw);
+  speeds[2] = int(double(HoverThrottle2) - p*(pitch - pitchin) - i*ipitch - d*dpitch - yp*zdps - yd*dyaw);
+  speeds[3] = int(double(HoverThrottle2) + p*(pitch - pitchin) + i*ipitch + d*dpitch - yp*zdps - yd*dyaw);
+}
+
+void simplePD() {
+  speeds[0] = HoverThrottle2 - p*(roll - rollin) - d*xdps;
+  speeds[1] = HoverThrottle2 - p*(rollin - roll) + d*xdps;
+  speeds[2] = HoverThrottle2 - p*(pitch - pitchin) - d*ydps;
+  speeds[3] = HoverThrottle2 - p*(pitchin - pitch) + d*ydps;
 }
 
 void SetTuningsClassicPID() {

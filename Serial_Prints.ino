@@ -4,17 +4,9 @@ unsigned int MilliPrintTime = 1; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-    PitchRoll();
-    Theta();
+    CompareRoRm();
     Serial.println();
   }
-}
-
-void CompareGyroAccelPitchRoll() {
-  Serial.print(" thetaX2: "); Serial.print(thetaX2);
-  Serial.print(" gx: "); Serial.print(gx);
-  Serial.print(" thetaY2: "); Serial.print(thetaY2);
-  Serial.print(" gy: "); Serial.print(gy);
 }
 
 void CompareRoRm() {
@@ -83,11 +75,6 @@ void PitchRoll() {
   Serial.print(" roll:"); Serial.print(roll);
 }
 
-void fPitchRoll() {
-  Serial.print(" fpitch:"); Serial.print(fpitch);
-  Serial.print(" froll:"); Serial.print(froll);
-}
-
 void MATLABGraph() {
   Serial.print("       "); Serial.print(thetaX);
   Serial.print("       "); Serial.print(0);
@@ -116,10 +103,7 @@ void AccelandGyro() {
 void Theta() {
   Serial.print(" thetaX:"); Serial.print(thetaX);
   Serial.print(" thetaY:"); Serial.print(thetaY);
-//  Serial.print(" thetaZ:"); Serial.print(thetaZ);
-//  Serial.print(" thetaX2:"); Serial.print(thetaX2);
-//  Serial.print(" thetaY2:"); Serial.print(thetaY2);
-//  Serial.print(" thetaZ2:"); Serial.print(thetaZ2);
+  Serial.print(" thetaZ:"); Serial.print(thetaZ);
 }
 
 //void pidvalues() {
@@ -127,6 +111,4 @@ void Theta() {
 //  Serial.print("     NSComplement:"); Serial.print(NSComplement);
 //  Serial.print("     roll:"); Serial.print(roll);
 //  Serial.print("     WEComplement:"); Serial.print(WEComplement);
-//  Serial.print("     North Motor:"); Serial.print((HoverThrottle - NSComplement + (MaxWave - HoverThrottle) / 2));
-//  Serial.print("     South Motor:"); Serial.print((HoverThrottle + NSComplement + (MaxWave - HoverThrottle) / 2));
 //}
