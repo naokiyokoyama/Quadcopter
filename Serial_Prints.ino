@@ -1,10 +1,12 @@
 unsigned long PrintTracker;
-unsigned int MilliPrintTime = 1; // Time between prints in milliseconds
+unsigned int MilliPrintTime = 100; // Time between prints in milliseconds
 
 void printValues() {
   if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-    CompareRoRm();
+    Serial.print(" yp:"); Serial.print(pyaw);
+    Serial.print(" yi:"); Serial.print(iyaw);
+    Serial.print(" yd:"); Serial.print(yd*zdps);
     Serial.println();
   }
 }
@@ -41,7 +43,8 @@ void Controls() {
   Serial.print(" LeftVertical:"); Serial.print(LeftVertical());
   Serial.print(" RightVertical:"); Serial.print(RightVertical());
   Serial.print(" LeftHorizontal:"); Serial.print(LeftHorizontal());
-
+  Serial.print(" LeftToggle:"); Serial.print(LeftToggle);
+  Serial.print(" RightToggle:"); Serial.print(RightToggle);
 }
 
 void ZeroControls() {

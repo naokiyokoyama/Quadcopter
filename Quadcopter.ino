@@ -56,9 +56,9 @@ float gx, gy, gz;                        // Intgrated angle values
 
 float SC = 0.069657;                   // Scale factor in dps/LSB
 int xRm, yRm, zRm;                       // Raw measurements from the gyroscope
-int xRo = -1;                       // Zero rate level angles, or byte values when there is no angular velocity present
+int xRo = 1;                       // Zero rate level angles, or byte values when there is no angular velocity present
 int yRo = -1;
-int zRo = 2;
+int zRo = -2;
 int xRth = 20;                           // Threshold for gyroscope byte values to reduce ambient noise
 int yRth = 20;
 int zRth = 20; 
@@ -73,11 +73,18 @@ int AccelAddress = 25;
 double ax, ay, az, ar, thetaX, thetaY, thetaZ; 
 double fax, fay, faz;
 
+// MAGNETOMETER
+
+double mx, my, mz;
+double heading;
+
 // ANGLES
 const double CFRatio = 0.98;
+const double YawRatio = 0.8;
 double pitch, roll, yaw;
 double oldpitch, oldroll, oldyaw; 
 double LevelPitch, LevelRoll;
+double pitchin, rollin, yawin;
 
 // RECEIVER
 boolean LeftToggle, RightToggle;
@@ -94,9 +101,9 @@ int axindex, ayindex, azindex;
 
 void setup() {
   Wire.begin();
-//  Serial.begin(9600); printing = true;
+  Serial.begin(9600); printing = true;
   setupMotors();                              // Attaches each motor to its appropriate pin and sends them the minimum wave
-  while(!accel.begin() || !mag.begin()){}     // Waits until the accelerometer is found
+  while(!accel.begin() || !mag.begin()){}     // Waits until the LSM303DLHC is found
   delay(300);                                 // Makes sure that the sensors have been properly initialized
   itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_1)); //Sets the gyroscope scale for the outputs to +/-2000 degrees per second
   itgWrite(itgAddress, SMPLRT_DIV, 9);        // Sets the sample rate to 100 hz
@@ -105,6 +112,10 @@ void setup() {
   ar = sqrt(ax*ax + ay*ay + az*az);
   roll = 90.0 - (acos(ax/ar)*(180.0/PI));
   pitch = 90.0 - (acos(ay/ar)*(180.0/PI));
+  getMagValues();
+  getMagHeading();
+  yaw = heading;
+  yawin = yaw;
   setupReceiverInterrupts();
   while(millis() < 6000) {
     calibrateRxLoop();
@@ -118,6 +129,9 @@ void setup() {
     getAccelValues();                         // Computes acceleration and tilt in each axis
     getAccelAngles(ax, ay, az);
     ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
+    getMagValues();
+    getMagHeading();
+    getYaw();
     printValues();
     MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
   }
@@ -139,6 +153,9 @@ void loop() {
   faz = simpleMovingAverage(az, azsum, azRm);
   getAccelAngles(fax, fay, faz);
   ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
+  getMagValues();
+  getMagHeading();
+  getYaw();
   ESCFunctions(); 
   printValues();
   MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop

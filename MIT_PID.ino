@@ -5,39 +5,32 @@ int MaxWave2 = 179;        // Upper speed limit
 int MinWave2 = 40;         // Lower speed limit
 int HoverThrottle2 = 100;  // Speed of motor when level
 
-double rollin = 0.0;
-double pitchin = 0.0;//-48.4;
+double p, i, d;
+//double p = 0.5538;//0.6; //.36
+//double i = 0.852;//0.099;//0.9527812;
+//double d = 0.09;//0.11;//1444 900 2020 0 1000
 
-double p = 0.5538;//0.6; //.36
-double i = 0.852;//0.099;//0.9527812;
-double d = 0.09;//0.11;//1444 900 2020 0 1000
-
-double yp = 0.197; //.36
-double yd = 0.03;
+double yp = 0.03; 
+double yi = 0.02;
+double yd = 0.05;
 
 double period = 1.379;
-
-double droll, iroll, dpitch, ipitch;
+double iroll, ipitch, iyaw, pyaw;
 
 void MITPID() {
+  // Control the pitch and roll with the left side of the radio
   pitchin = double(map(LeftVertical(), -500, 500, -15, 15) * 2);
   rollin = double(map(LeftHorizontal(), -500, 500, -15, 15) * 2);
-  
+  // Control the throttle with the right side
   HoverThrottle2 = map(RightVertical(), 0, 1010, 30, 150);
-
-//  HoverThrottle2 = 120;
-  
-//  p = double(map(RightVerticalVolatile, 900, 2020, 2000, 3500)) / 1000.0;
-  
-//  if(p<0) p = 0.0;
-
-  if(HoverThrottle2<30) HoverThrottle2=30;
+  if(HoverThrottle2 < 30) HoverThrottle2 = 30;
   
   deltaPID();
   
+  // Speed limits
   for(int x=0; x<4; x++) {
-    if(speeds[x]>MaxWave2) speeds[x]=MaxWave2;
-    if(speeds[x]<MinWave2) speeds[x]=MinWave2;
+    if(speeds[x] > MaxWave2) speeds[x] = MaxWave2;
+    if(speeds[x] < MinWave2) speeds[x] = MinWave2;
   }
   
   East.write(speeds[0]);
@@ -47,25 +40,31 @@ void MITPID() {
 }
 
 void deltaPID() {
-//  droll = (roll - oldroll)/ ( (double) MicrosPassed / 1000000.0);
-//  dpitch = (pitch - oldpitch)/ ( (double) MicrosPassed / 1000000.0);
+  // Save pyaw before it's updated
+  double oldpyaw = pyaw;
   
-  droll = xdps;
-  dpitch = ydps;
-  
-  double dyaw = (zdps - zdps1)/( (double) MicrosPassed / 1000000.0);
-  
-  if(pitchin != pitch){
-    iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
+  if(abs(yawin - yaw) > 180.0) {
+    double yawin2 = yawin + 180.0;
+    double yaw2 = yaw + 180.0;
+    if(yawin2 > 360.0) yawin2 -= 360.0;
+    if(yaw2 > 360.0) yaw2 -= 360.0;
+    pyaw = -(yawin2 - yaw2);
   }
-  if(rollin !=roll){
-    ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
-  }
+  else 
+  pyaw = -(yawin - yaw);
   
-  speeds[0] = int(double(HoverThrottle2) - p*(roll - rollin) - i*iroll - d*droll + yp*zdps + yd*dyaw);
-  speeds[1] = int(double(HoverThrottle2) + p*(roll - rollin) + i*iroll + d*droll + yp*zdps + yd*dyaw);
-  speeds[2] = int(double(HoverThrottle2) - p*(pitch - pitchin) - i*ipitch - d*dpitch - yp*zdps - yd*dyaw);
-  speeds[3] = int(double(HoverThrottle2) + p*(pitch - pitchin) + i*ipitch + d*dpitch - yp*zdps - yd*dyaw);
+  HoverThrottle2 = 100;
+  yp = double(map(RightVerticalVolatile, 995, 2015, 150, 300)) / 1000.0;
+  if(yp < 0) yp = .001;
+  
+  iyaw += DeltaTrapezoidalRule( oldpyaw, pyaw);
+  iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);
+  ipitch += DeltaTrapezoidalRule( oldpitch - pitchin, pitch - pitchin);
+  
+  speeds[0] = int(double(HoverThrottle2) - p*(roll - rollin) - i*iroll - d*xdps - yp*pyaw - yi*iyaw - yd*zdps);
+  speeds[1] = int(double(HoverThrottle2) + p*(roll - rollin) + i*iroll + d*xdps - yp*pyaw - yi*iyaw - yd*zdps);
+  speeds[2] = int(double(HoverThrottle2) - p*(pitch - pitchin) - i*ipitch - d*ydps + yp*pyaw + yi*iyaw + yd*zdps);
+  speeds[3] = int(double(HoverThrottle2) + p*(pitch - pitchin) + i*ipitch + d*ydps + yp*pyaw + yi*iyaw + yd*zdps);
 }
 
 void simplePD() {

@@ -4,9 +4,10 @@
 void ZeroRateLevelCalibration() {
   MillisTracker = millis();
   while(millis() < MillisTracker + MilliCalibrationTime) {
-    xRmSum += readX();
-    yRmSum += readY();
-    zRmSum += readZ();
+    getGyroValues();
+    xRmSum += xRm;
+    yRmSum += yRm;
+    zRmSum += zRm;
     ZRLCloops++;
   }
   xRo = xRmSum / ZRLCloops;
@@ -17,7 +18,7 @@ void ZeroRateLevelCalibration() {
 void getGyroValues() {
   xRm = -readY();
   yRm = readX();
-  zRm = readZ();
+  zRm = -readZ();
 }
 
 void getGyroDPS(int XRM, int YRM, int ZRM) {

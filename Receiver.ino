@@ -6,11 +6,7 @@ const int Ch2 = 4;                 // Pin 19, right vertical
 const int Ch3 = 0;                 // Pin 2, left vertical
 const int Ch4 = 1;                 // Pin 3, left horizontal
 
-volatile unsigned long CalibrateRxTracker, riseCh1, riseCh2, riseCh3, riseCh4;
-
-
-int cloops;
-unsigned long int ch1s, ch2s, ch3s, ch4s; 
+volatile unsigned long CalibrateRxTracker, riseCh1, riseCh2, riseCh3, riseCh4; 
 
 // Average Idle Channel Outputs
 int RightHorizontalZero, LeftVerticalZero, RightVerticalZero, LeftHorizontalZero;
@@ -31,22 +27,20 @@ void startInterrupts() {
   attachInterrupt(Ch4, risingCh4Signal, RISING);
   CalibrateRxTracker = millis();
   calibrate = true;
-  ch1s = 0;
-  ch2s = 0;
-  ch3s = 0;
-  ch4s = 0;
-  cloops = 0;
 }
 
 void calibrateRxLoop() { 
-  if(calibrate && millis() < CalibrateRxTracker + 1000) {
+  static unsigned int cloops;
+  static long ch1s, ch2s, ch3s, ch4s;
+  
+  if(calibrate && millis() < CalibrateRxTracker + 1000 && millis() > CalibrateRxTracker + 300) {    
     ch1s += RightHorizontalVolatile;
     ch2s += RightVerticalVolatile;
     ch3s += LeftVerticalVolatile;
     ch4s += LeftHorizontalVolatile;
     cloops++;
   } 
-  else if(calibrate) {
+  else if(calibrate && millis() > CalibrateRxTracker + 400) {
     RightHorizontalZero = ch1s/cloops;
     RightVerticalZero = ch2s/cloops;
     LeftVerticalZero = ch3s/cloops;
@@ -136,23 +130,6 @@ int LeftHorizontal() {
 
 void setupReceiverInterrupts() {
   attachInterrupt(Ch1, startInterrupts, RISING);
-}
-
-void CalibrateIdleReceiverValues() {
-  unsigned long int IdleRxTracker;
-  int IdleRxTime = 100;
-  IdleRxTracker = millis();
-  while(millis() < IdleRxTracker + IdleRxTime) {
-    ch1s += RightHorizontalVolatile;
-    ch2s += RightVerticalVolatile;
-    ch3s += LeftVerticalVolatile;
-    ch4s += LeftHorizontalVolatile;
-    cloops++;
-  }
-  RightHorizontalZero = ch1s/cloops;
-  RightVerticalZero = ch2s/cloops;
-  LeftVerticalZero = ch3s/cloops;
-  LeftHorizontalZero = ch4s/cloops;
 }
 
 void CalibrateIdleReceiverValues2() {

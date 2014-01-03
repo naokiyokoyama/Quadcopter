@@ -1,5 +1,6 @@
 void getAccelValues() {
   sensors_event_t aevent;
+  
   accel.getEvent(&aevent);
   
   ax = aevent.acceleration.x;
