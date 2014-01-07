@@ -18,10 +18,10 @@ void setupMotors() {
 }
 
 void testSimple() {
-  North.write(90);
-  West.write(90);
-  South.write(90);
-  East.write(90);
+  North.write(60);
+  West.write(10);
+  South.write(60);
+  East.write(10);
 }
 
 void testDrive() {

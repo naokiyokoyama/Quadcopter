@@ -2,17 +2,17 @@
 int speeds[4];
 
 int MaxWave2 = 179;        // Upper speed limit
-int MinWave2 = 40;         // Lower speed limit
+int MinWave2 = 10;         // Lower speed limit
 int HoverThrottle2 = 100;  // Speed of motor when level
 
-double p, i, d;
-//double p = 0.5538;//0.6; //.36
-//double i = 0.852;//0.099;//0.9527812;
-//double d = 0.09;//0.11;//1444 900 2020 0 1000
+//double p, i, d;
+double p = 0.5538;//0.6; //.36
+double i = 0.852;//0.099;//0.9527812;
+double d = 0.09;//0.11;//1444 900 2020 0 1000
 
-double yp = 0.03; 
-double yi = 0.02;
-double yd = 0.05;
+double yp = .00;// = 0.03; 
+double yi = .00;//; = 0.02;
+double yd = .197;
 
 double period = 1.379;
 double iroll, ipitch, iyaw, pyaw;
@@ -22,7 +22,7 @@ void MITPID() {
   pitchin = double(map(LeftVertical(), -500, 500, -15, 15) * 2);
   rollin = double(map(LeftHorizontal(), -500, 500, -15, 15) * 2);
   // Control the throttle with the right side
-  HoverThrottle2 = map(RightVertical(), 0, 1010, 30, 150);
+  HoverThrottle2 = map(RightVertical(), 0, 1010, 40, 150);
   if(HoverThrottle2 < 30) HoverThrottle2 = 30;
   
   deltaPID();
@@ -53,9 +53,9 @@ void deltaPID() {
   else 
   pyaw = -(yawin - yaw);
   
-  HoverThrottle2 = 100;
-  yp = double(map(RightVerticalVolatile, 995, 2015, 150, 300)) / 1000.0;
-  if(yp < 0) yp = .001;
+//  yd = double(map(RightVerticalVolatile, 990, 2012, 130, 170)) / 100.0;
+//  if(yd < 0) yd = .001;
+//  HoverThrottle2 = 90;
   
   iyaw += DeltaTrapezoidalRule( oldpyaw, pyaw);
   iroll += DeltaTrapezoidalRule( oldroll - rollin, roll - rollin);

@@ -101,7 +101,7 @@ int axindex, ayindex, azindex;
 
 void setup() {
   Wire.begin();
-  Serial.begin(9600); printing = true;
+//  Serial.begin(9600); printing = true;
   setupMotors();                              // Attaches each motor to its appropriate pin and sends them the minimum wave
   while(!accel.begin() || !mag.begin()){}     // Waits until the LSM303DLHC is found
   delay(300);                                 // Makes sure that the sensors have been properly initialized
