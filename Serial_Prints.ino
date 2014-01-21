@@ -4,17 +4,15 @@ unsigned int MilliPrintTime = 100; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-    Serial.print(" yp:"); Serial.print(pyaw);
-    Serial.print(" yi:"); Serial.print(iyaw);
-    Serial.print(" yd:"); Serial.print(yd*zdps);
+    PitchRoll();
     Serial.println();
   }
 }
 
 void CompareRoRm() {
-  Serial.print(" xRo:"); Serial.print(xRo);
-  Serial.print(" yRo:"); Serial.print(yRo);
-  Serial.print(" zRo:"); Serial.print(zRo);
+  Serial.print(" xRo:"); Serial.print(xRo, DEC);
+  Serial.print(" yRo:"); Serial.print(yRo, DEC);
+  Serial.print(" zRo:"); Serial.print(zRo, DEC);
   Serial.print(" xRm:"); Serial.print(xRm);
   Serial.print(" yRm:"); Serial.print(yRm);
   Serial.print(" zRm:"); Serial.print(zRm);
