@@ -4,24 +4,29 @@
  #include "WProgram.h"
 #endif
 
+PIDCont pitchRatePID, rollRatePID, pitchPositionPID, rollPositionPID;
+
+double pitchin, rollin, yawin;
+
 // Variables created to measure time passed
 unsigned long MicrosPassed;         // Amount of time taken to run the last loop
 unsigned long MicrosTracker;        // Value in which the current time is stored to compute the time passed
 unsigned long MillisTracker;        // Value in which the current time is stored to compute the time passed
 unsigned long LoopTracker;          // Value in which the current time is stored to compute the time passed
 unsigned int LoopTime;              // Time the loop takes in milliseconds
+double timePassed; 
 
 boolean printing = false;
 
 // ESC 
 boolean STOP = false;               // When this boolean is false, the motors permanently stop running
 
-Servo North;                        // Northwest
-Servo West;                         // Southwest
-Servo South;                        // Southeast
-Servo East;                         // Northeast
+const int ESCMin = 124; // Minimum pulse that will be sent to the ESC
 
-const int ESCMin = 10; // Minimum pulse that will be sent to the ESC
+const int North = 11;
+const int West  = 10;
+const int South = 9;
+const int East  = 8;
 
 // GYROSCOPE
 char WHO_AM_I = 0x00;
@@ -44,7 +49,7 @@ char itgAddress = 0x69;
 
 const int GyroAddress = 105;
 
-float xRmSum, yRmSum, zRmSum, ZRLCloops;  // Variables used to calibrate the gyroscope 
+double xRmSum, yRmSum, zRmSum, ZRLCloops;  // Variables used to calibrate the gyroscope 
 
 double xdps, ydps, zdps;                  // Degrees per second calculated for every axis
 double xdps1, ydps1, zdps1;               // DPS from the last loop to be used for the Trapezoidal Rule
@@ -177,11 +182,11 @@ const double CFRatio = 0.98;
 const double YawRatio = 0.8;
 double pitch, roll, yaw;
 double LevelPitch, LevelRoll;
-double pitchin, rollin, yawin;
 
 // RECEIVER
 boolean LeftToggle, RightToggle;
-volatile int RightHorizontalVolatile, LeftVerticalVolatile, RightVerticalVolatile, LeftHorizontalVolatile;
+volatile int volatileRx[4];
+int trueRx[4];
 
 //NOISE REDUCTION
 const int samples = 20;
@@ -203,11 +208,11 @@ double simpleMovingAverage(double raw, double total, double *array) {
     total += array[x];
   }
   
-  return total / samples;
+  return total / (double)samples;
 }
 
-float DeltaTrapezoidalRule(float old, float current) { // Approximate integration using the Trapezoidal Rule
-  float trapezoid = (old + current) * (float)MicrosPassed * 0.0000005;
+double DeltaTrapezoidalRule(double old, double current) { // Approximate integration using the Trapezoidal Rule
+  double trapezoid = (old + current) * (double)MicrosPassed * 0.0000005;
   return trapezoid; 
 }
 

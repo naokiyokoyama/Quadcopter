@@ -1,32 +1,28 @@
-#include <Servo.h>
+int ESCMin = 124;
+int ESCMax = 254;
 
-Servo Nw; // Northwest
-Servo Sw; // Southwest
-Servo Se; // Southeast
-Servo Ne; // Northeast
-
-int ESCMin = 10;
+const int North = 11;
+const int West  = 10;
+const int South = 9;
+const int East  = 8;
 
 void setup() {
-  Nw.attach(7);
-  Sw.attach(6);
-  Se.attach(5);
-  Ne.attach(4);
-  while(analogRead(15) < 4) {
-    Nw.write(179);
-    Sw.write(179);
-    Se.write(179);
-    Ne.write(179);
+  pinMode(North, OUTPUT);
+  pinMode(West,  OUTPUT);
+  pinMode(South, OUTPUT);
+  pinMode(East,  OUTPUT);
+  while(millis() < 4000) {
+    analogWrite(North, ESCMax);
+    analogWrite(West,  ESCMax);
+    analogWrite(South, ESCMax);
+    analogWrite(East,  ESCMax);
   }
   while(1 == 1) {
-    Nw.write(ESCMin);
-    Sw.write(ESCMin);
-    Se.write(ESCMin);
-    Ne.write(ESCMin);
+    analogWrite(North, ESCMin);
+    analogWrite(West,  ESCMin);
+    analogWrite(South, ESCMin);
+    analogWrite(East,  ESCMin);
   }
 }
 
-void loop() {
-  // put your main code here, to run repeatedly: 
-  
-}
+void loop() {}

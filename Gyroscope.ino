@@ -21,9 +21,9 @@ void getGyroValues() {
 }
 
 void getGyroDPS(int XRM, int YRM, int ZRM) {
-  xdps = SC * (float)XRM - xRo;
-  ydps = SC * (float)YRM - yRo;
-  zdps = SC * (float)ZRM - zRo;
+  xdps = SC * (double)XRM - xRo;
+  ydps = SC * (double)YRM - yRo;
+  zdps = SC * (double)ZRM - zRo;
 }
 
 void getGyroDPS1(int XRM, int YRM, int ZRM) {
@@ -63,9 +63,9 @@ void logOldDPS() {
 }
 
 void getGyroAngles() {
-  gx = xdps * (float)MicrosPassed / 1000000.0;
-  gy = ydps * (float)MicrosPassed / 1000000.0;
-  gz = zdps * (float)MicrosPassed / 1000000.0;
+  gx = xdps * (float)MicrosPassed * 0.000001;
+  gy = ydps * (float)MicrosPassed * 0.000001;
+  gz = zdps * (float)MicrosPassed * 0.000001;
 }
 
 int readX(void)

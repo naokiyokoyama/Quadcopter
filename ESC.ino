@@ -7,33 +7,30 @@ boolean StopBegun = false;                   // Indicates whether the pivot sequ
 int lastPivot;                               // Contains the last zdps value of the sequence while it still exists
 
 void setupMotors() {
-  North.attach(7);
-  West.attach(6);
-  South.attach(5);
-  East.attach(4);
-  North.write(ESCMin);
-  West.write(ESCMin);
-  South.write(ESCMin);
-  East.write(ESCMin);
+  pinMode(North, OUTPUT);
+  pinMode(West,  OUTPUT);
+  pinMode(South, OUTPUT);
+  pinMode(East,  OUTPUT);
+  analogWrite(North, ESCMin);
+  analogWrite(West,  ESCMin);
+  analogWrite(South, ESCMin);
+  analogWrite(East,  ESCMin);
 }
 
 void testSimple() {
-  North.write(60);
-  West.write(10);
-  South.write(60);
-  East.write(10);
+  analogWrite(North, 150);
+  analogWrite(West,  150);
+  analogWrite(South, 150);
+  analogWrite(East,  150);
 }
 
 void testDrive() {
-  int stickinput = RightVertical() * 14 / 100;
+  int stickinput = map(trueRx[1], 0, 1010, 145, 240);
   
-  if(stickinput>120) stickinput=120;
-  if(stickinput<30) stickinput=30;
-  
-  North.write(stickinput);
-  West.write(stickinput);
-  South.write(stickinput);
-  East.write(stickinput);
+  analogWrite(North, stickinput);
+  analogWrite(West,  stickinput);
+  analogWrite(South, stickinput);
+  analogWrite(East,  stickinput);
 }
 
 
