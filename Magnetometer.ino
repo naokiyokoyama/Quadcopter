@@ -4,12 +4,14 @@ const float mzoffset = 4.035;
 
 
 void getMagValues() {
-  sensors_event_t mevent;
-  mag.getEvent(&mevent);
-  
-  mx = mevent.magnetic.x + mxoffset; 
-  my = mevent.magnetic.y + myoffset;
-  mz = -1 * (mevent.magnetic.z + mzoffset);
+  Wire.beginTransmission(LSM303_MAG);
+  Wire.write(OUT_X_H_M);
+  Wire.endTransmission();
+  Wire.requestFrom(LSM303_MAG, 6);
+ 
+  mx = ((Wire.read() << 8) | Wire.read()) + mxoffset; 
+  my = ((Wire.read() << 8) | Wire.read()) + myoffset;
+  mz = -1 * (((Wire.read() << 8) | Wire.read()) + mzoffset);
 }
 
 void getMagHeading() {

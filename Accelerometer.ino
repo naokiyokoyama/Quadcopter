@@ -1,11 +1,32 @@
+const double conversionFactor = double(SCALE / pow(2, 15));
+
+void initLSM303(int fs)
+{
+  itgWrite(LSM303_ACC, CTRL_REG1_A, 0b10010111);  // low power mode, 5.376 kHz, all accel axes on
+  switch (fs) {
+    case 2:
+    itgWrite(LSM303_ACC, CTRL_REG4_A, 0b00000000);
+    break;
+    case 4:
+    itgWrite(LSM303_ACC, CTRL_REG4_A, 0b00010000);
+    break;
+    case 8:
+    itgWrite(LSM303_ACC, CTRL_REG4_A, 0b00100000);
+    break;
+  }
+  itgWrite(LSM303_MAG, CRA_REG_M, 0b00011100); 
+  itgWrite(LSM303_MAG, MR_REG_M, 0b00000000);  
+}
+
 void getAccelValues() {
-  sensors_event_t aevent;
+  int z = -((int)LSM303_read(OUT_X_L_A) << 8) | (LSM303_read(OUT_X_H_A));
+  int x = ((int)LSM303_read(OUT_Y_L_A) << 8) | (LSM303_read(OUT_Y_H_A));
+  int y = ((int)LSM303_read(OUT_Z_L_A) << 8) | (LSM303_read(OUT_Z_H_A));  
   
-  accel.getEvent(&aevent);
-  
-  ax = aevent.acceleration.x;
-  ay = aevent.acceleration.y;
-  az = -1 * aevent.acceleration.z;
+  az = z * conversionFactor;
+  ax = x * conversionFactor;
+  ay = y * conversionFactor;
+  // had to swap those to right the data with the proper axis
 }
 
 void getAccelAngles(double accelX, double accelY, double accelZ) {
@@ -32,18 +53,5 @@ void AccelLevelCalibration() {
   LevelRoll = rollsum / loops;
 }   
 
-int readI2C (int Address, byte regAddr) {
-    Wire.beginTransmission(Address);
-    Wire.write(regAddr);                // Register address to read
-    Wire.endTransmission();             // Terminate request
-    Wire.requestFrom(Address, 1);          // Read a byte
-    while(!Wire.available()) { };       // Wait for receipt
-    return(Wire.read());                // Get result
-}
 
-void writeI2C (int Address, byte regAddr, byte val) {
-    Wire.beginTransmission(Address);
-    Wire.write(regAddr);
-    Wire.write(val);
-    Wire.endTransmission();
-}
+

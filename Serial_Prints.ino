@@ -4,20 +4,34 @@ unsigned int MilliPrintTime = 100; // Time between prints in milliseconds
 void printValues() {
   if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-    Serial.print(" yp:"); Serial.print(pyaw);
-    Serial.print(" yi:"); Serial.print(iyaw);
-    Serial.print(" yd:"); Serial.print(yd*zdps);
+//    Serial.print(" xRo:"); Serial.print(printt, DEC);
+    Serial.print(" pitchin:"); Serial.print(pitchin);
+    Serial.print(" rollin:"); Serial.print(rollin);
     Serial.println();
   }
 }
 
 void CompareRoRm() {
-  Serial.print(" xRo:"); Serial.print(xRo);
-  Serial.print(" yRo:"); Serial.print(yRo);
-  Serial.print(" zRo:"); Serial.print(zRo);
+  Serial.print(" xRo:"); Serial.print(xRo, DEC);
+  Serial.print(" yRo:"); Serial.print(yRo, DEC);
+  Serial.print(" zRo:"); Serial.print(zRo, DEC);
   Serial.print(" xRm:"); Serial.print(xRm);
   Serial.print(" yRm:"); Serial.print(yRm);
   Serial.print(" zRm:"); Serial.print(zRm);
+}
+
+void RxValues() {
+  for(int x=0; x<4; x++) {
+    Serial.print(trueRx[x]);
+    Serial.print("\t\t"); 
+  }
+}
+
+void motorValues() {
+  for(int x=0; x<4; x++) {
+    Serial.print(speeds[x]);
+    Serial.print("\t\t"); 
+  }
 }
 
 void IntegratedGyroValues() {
@@ -28,30 +42,6 @@ void IntegratedGyroValues() {
 
 void MilliLoopTime() {
   Serial.print(" LoopTime:"); Serial.print(LoopTime);
-}
-
-void VolatileControls() {
-  Serial.print(" RightHorizontalVolatile:"); Serial.print(RightHorizontalVolatile);
-  Serial.print(" LeftVerticalVolatile:"); Serial.print(LeftVerticalVolatile);
-  Serial.print(" RightVerticalVolatile:"); Serial.print(RightVerticalVolatile);
-  Serial.print(" LeftHorizontalVolatile:"); Serial.print(LeftHorizontalVolatile);
-
-}
-
-void Controls() {
-  Serial.print(" RightHorizontal:"); Serial.print(RightHorizontal());
-  Serial.print(" LeftVertical:"); Serial.print(LeftVertical());
-  Serial.print(" RightVertical:"); Serial.print(RightVertical());
-  Serial.print(" LeftHorizontal:"); Serial.print(LeftHorizontal());
-  Serial.print(" LeftToggle:"); Serial.print(LeftToggle);
-  Serial.print(" RightToggle:"); Serial.print(RightToggle);
-}
-
-void ZeroControls() {
-  Serial.print(" RightHorizontalZero:"); Serial.print(RightHorizontalZero);
-  Serial.print(" LeftVerticalZero:"); Serial.print(LeftVerticalZero);
-  Serial.print(" RightVerticalZero:"); Serial.print(RightVerticalZero);
-  Serial.print(" LeftHorizontalZero:"); Serial.print(LeftHorizontalZero);
 }
 
 void LevelAccelTilts() {

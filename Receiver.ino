@@ -3,13 +3,14 @@
 // Interrupt Pins
 const int Ch1 = 5;                 // Pin 18, right horizontal
 const int Ch2 = 4;                 // Pin 19, right vertical
-const int Ch3 = 0;                 // Pin 2, left vertical
-const int Ch4 = 1;                 // Pin 3, left horizontal
+const int Ch3 = 0;                 // Pin 2, left horizontal
+const int Ch4 = 1;                 // Pin 3, left vertical
 
 volatile unsigned long CalibrateRxTracker, riseCh1, riseCh2, riseCh3, riseCh4; 
 
 // Average Idle Channel Outputs
-int RightHorizontalZero, LeftVerticalZero, RightVerticalZero, LeftHorizontalZero;
+
+int zeroRx[4];
 
 // Digital Input Pins
 const int Ch5 = 22;                 // Pin 2
@@ -31,20 +32,16 @@ void startInterrupts() {
 
 void calibrateRxLoop() { 
   static unsigned int cloops;
-  static long ch1s, ch2s, ch3s, ch4s;
+  static long sumRx[4];
   
   if(calibrate && millis() < CalibrateRxTracker + 1000 && millis() > CalibrateRxTracker + 300) {    
-    ch1s += RightHorizontalVolatile;
-    ch2s += RightVerticalVolatile;
-    ch3s += LeftVerticalVolatile;
-    ch4s += LeftHorizontalVolatile;
+    for(int x=0; x<4; x++) 
+      {sumRx[x] += volatileRx[x];}
     cloops++;
   } 
   else if(calibrate && millis() > CalibrateRxTracker + 400) {
-    RightHorizontalZero = ch1s/cloops;
-    RightVerticalZero = ch2s/cloops;
-    LeftVerticalZero = ch3s/cloops;
-    LeftHorizontalZero = ch4s/cloops;
+    for(int x=0; x<4; x++) 
+      {zeroRx[x] = sumRx[x] / cloops;}
     calibrate = false;
     calibrated = true;
   }
@@ -58,14 +55,15 @@ void calibrateRxLoop() {
       else if (pulse < 1300)
       LeftToggle = false; 
       
-      pulse = pulseIn(Ch6, HIGH);
-      if(pulse > 1700) 
+      int pulse2 = pulseIn(Ch6, HIGH);
+      if(pulse2 > 1700) 
       RightToggle = true;
-      else if (pulse < 1300)
+      else if (pulse2 < 1300)
       RightToggle = false;
     }
   } 
 }
+
 void risingCh1Signal() {
   attachInterrupt(Ch1, fallingCh1Signal, FALLING);
   riseCh1 = micros();
@@ -73,7 +71,7 @@ void risingCh1Signal() {
 
 void fallingCh1Signal() {
   attachInterrupt(Ch1, risingCh1Signal, RISING);
-  RightHorizontalVolatile = micros() - riseCh1;
+  volatileRx[0] = micros() - riseCh1;
 }
   
 void risingCh2Signal() {
@@ -83,7 +81,7 @@ void risingCh2Signal() {
 
 void fallingCh2Signal() {
   attachInterrupt(Ch2, risingCh2Signal, RISING);
-  RightVerticalVolatile = micros() - riseCh2;
+  volatileRx[1] = micros() - riseCh2;
 }
 
 void risingCh3Signal() {
@@ -93,7 +91,7 @@ void risingCh3Signal() {
 
 void fallingCh3Signal() {
   attachInterrupt(Ch3, risingCh3Signal, RISING);
-  LeftVerticalVolatile = micros() - riseCh3;
+  volatileRx[2] = micros() - riseCh3;
 }
 
 void risingCh4Signal() {
@@ -103,40 +101,25 @@ void risingCh4Signal() {
 
 void fallingCh4Signal() {
   attachInterrupt(Ch4, risingCh4Signal, RISING);
-  LeftHorizontalVolatile = micros() - riseCh4;
+  volatileRx[3] = micros() - riseCh4;
 }
 
-int RightHorizontal() { 
-  if(!calibrated) return 0;
-  else return RightHorizontalVolatile - RightHorizontalZero;
-}
-
-int RightVertical() { 
-  if(!calibrated) return 0;
-  else return RightVerticalVolatile - RightVerticalZero;
-}
-
-int LeftVertical() { 
-  if(!calibrated) return 0;
-  else return LeftVerticalVolatile - LeftVerticalZero;
-}
-
-int LeftHorizontal() { 
-  if(!calibrated) return 0;
-  else return LeftHorizontalVolatile - LeftHorizontalZero;
+void getRxValues() {
+  static const int threshold = 30;
+  
+  if(calibrated) {
+    for(int x=0; x<4; x++) {
+      trueRx[x] = volatileRx[x] - zeroRx[x];
+      if(abs(trueRx[x]) < threshold)
+        trueRx[x] = 0;
+    }
+  }
 }
 
 // SETUP FUNCTIONS
 
 void setupReceiverInterrupts() {
   attachInterrupt(Ch1, startInterrupts, RISING);
-}
-
-void CalibrateIdleReceiverValues2() {
-  RightHorizontalZero = RightHorizontalVolatile;
-  LeftVerticalZero = LeftVerticalVolatile;
-  RightVerticalZero = RightVerticalVolatile;
-  LeftHorizontalZero = LeftHorizontalVolatile;
 }
 
 
