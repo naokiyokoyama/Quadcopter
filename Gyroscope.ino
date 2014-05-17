@@ -1,99 +1,51 @@
 
-void ZeroRateLevelCalibration() {
-  MillisTracker = millis();
-  while(millis() < MillisTracker + MilliCalibrationTime) {
-    getGyroValues();
-    getGyroDPS(xRm, yRm, zRm);
-    xRmSum += xdps;
-    yRmSum += ydps;
-    zRmSum += zdps;
-    ZRLCloops = ZRLCloops + 1.0;
+void ZeroRateLevelCalibration(boolean cond) {
+  if(cond) {
+    unsigned long ZRLCtracker = millis();
+    long gyrosum[3];
+    long ZRLCloops;
+    while(millis() < ZRLCtracker + 2000) {
+      int gyro[3];
+      IMU.getGyroValues(gyro);
+      for (int i=0;i<3;i++)
+        gyrosum[i] += gyro[i];
+      ZRLCloops++;
+    }
+    for (int i=0;i<3;i++)
+      gyrozero[i] = (float)gyrosum[i] / (float)ZRLCloops;
   }
-  xRo = xRmSum / ZRLCloops;
-  yRo = yRmSum / ZRLCloops;
-  zRo = zRmSum / ZRLCloops;
+  else {
+    gyrozero[0] = -0.2212387 - 0.0299484 - 0.5754207;
+    gyrozero[1] = -0.0456476 - 0.0437478 - 0.4897250;
+    gyrozero[2] = 0.3237676 + 0.7822324;
+    thetazero[0] = 1.73 + 0.52 - 0.25123;
+    thetazero[1] = 3.86 + 1.07 + 0.04;
+  }
 }   
 
-void getGyroValues() {
-  xRm = -readY();
-  yRm = readX();
-  zRm = -readZ();
+//dpsX: -0.0299484	 dpsY: -0.0437478	
+//dpsX: -0.5754207	 dpsY: -0.4897250	 dpsZ: 0.7822324
+
+void getGyroDPS(float *array) {
+  for (int i=0;i<3;i++)
+    dps[i] = gyroSC * array[i];
+  dps[0] *= -1;
 }
 
-void getGyroDPS(int XRM, int YRM, int ZRM) {
-  xdps = SC * (double)XRM - xRo;
-  ydps = SC * (double)YRM - yRo;
-  zdps = SC * (double)ZRM - zRo;
+void driftCompensation(float *array, float *zero) {
+  for (int i=0;i<3;i++)
+    array[i] -= zero[i];
 }
 
-void getGyroDPS1(int XRM, int YRM, int ZRM) {
-  int dR;
-  if(abs(XRM - xRo) > xRth) {
-    dR = XRM - xRo;
-    xdps = SC * (float)dR;
-  }
-  else
-  {xdps = 0;}
-  
-  if(abs(YRM - yRo) > yRth) {
-    dR = YRM - yRo;
-    ydps = SC * (float)dR;
-  }
-  else
-  {ydps = 0;}
-  
-  if(abs(ZRM - zRo) > zRth) {
-    dR = ZRM - zRo;
-    zdps = SC * (float)dR;
-  }
-  else
-  {zdps = 0;}
+void getGyroDPS2(float *current, float *old) {
+  float timePassed = MicrosPassed * 0.000001;
+  for (int i=0;i<3;i++)
+    dps2[i] = (current[i]-old[i]) / timePassed;
 }
 
-void transformGyroDPS() {
-  int oldydps = ydps;
-  ydps = xdps/sqrt(2) - ydps/sqrt(2);
-  xdps = -1 * (xdps/sqrt(2) + oldydps/sqrt(2));  
+void copyArray(float *dest, float *orig) { 
+  for (int i=0;i<3;i++)
+    dest[i] = orig[i];
 }
-
-void logOldDPS() { 
-  xdps1 = xdps;
-  ydps1 = ydps;
-  zdps1 = zdps;
-}
-
-void getGyroAngles() {
-  gx = xdps * (float)MicrosPassed * 0.000001;
-  gy = ydps * (float)MicrosPassed * 0.000001;
-  gz = zdps * (float)MicrosPassed * 0.000001;
-}
-
-int readX(void)
-{
-  int data=0;
-  data = itgRead(itgAddress, GYRO_XOUT_H)<<8;
-  data |= itgRead(itgAddress, GYRO_XOUT_L);  
-  
-  return data;
-}
-
-int readY(void)
-{
-  int data=0;
-  data = itgRead(itgAddress, GYRO_YOUT_H)<<8;
-  data |= itgRead(itgAddress, GYRO_YOUT_L);  
-  
-  return data;
-}
-
-int readZ(void)
-{
-  int data=0;
-  data = itgRead(itgAddress, GYRO_ZOUT_H)<<8;
-  data |= itgRead(itgAddress, GYRO_ZOUT_L);  
-  
-  return data;
-}
-
 
 

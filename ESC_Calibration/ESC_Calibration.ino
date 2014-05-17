@@ -1,10 +1,10 @@
 int ESCMin = 124;
 int ESCMax = 254;
 
-const int North = 11;
-const int West  = 10;
-const int South = 9;
-const int East  = 8;
+const int North = 3;
+const int West  = 4;
+const int South = 5;
+const int East  = 6;
 
 void setup() {
   pinMode(North, OUTPUT);

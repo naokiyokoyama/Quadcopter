@@ -1,74 +1,90 @@
 
-int speeds[4];
+const int MaxWave = 254;        // Upper speed limit
+const int MinWave = ESCMin;         // Lower speed limi
+// Speed of motor when level
 
-int MaxWave = 254;        // Upper speed limit
-int MinWave = ESCMin;         // Lower speed limit
-int throttle = ESCMin;  // Speed of motor when level
+float tune;
 
-boolean positionMode = true;
+float tuning(int low, int high) {
+  float constant;
+  
+  int rough = map(volatileRx[1], 1050, 2000, low, high);
+  constant = float(rough) / 1000.0;
+  if(constant < 0) constant = 0.0;
+  tune = constant;
+  return constant;
+}
 
-// Rate PID gains
-double Rp = .25;
-double Ri = .95;
-double Rd = .011;//.01397 * .9;
-// Position PID gains
-double Pp = 5.00;// = 0.03; 
-double Pi = .02;//; = 0.02;
-double Pd = -.015;//.197;
+//float period = 1.372;
 
 void initPID(){
-  pitchRatePID.changeConstants(Rp, Ri, Rd);
-  rollRatePID.changeConstants (Rp, Ri, Rd);
-  pitchPositionPID.changeConstants(Pp, Pi, Pd);
-  rollPositionPID.changeConstants (Pp, Pi, Pd);
+  rangle.changeConstants(aP, aI, aD, ainthresh, aoutthresh);
+  pangle.changeConstants(aP, aI, aD, ainthresh, aoutthresh);
+  rrate.changeConstants (rP, rI, rD, rinthresh, routthresh);
+  prate.changeConstants (rP, rI, rD, rinthresh, routthresh);
+  yrate.changeConstants (yP, yI, yD, yinthresh, youtthresh);
 }
-double printt;
+
+void throttleCtrl() {
+  // Control the throttle with the right vertical
+  throttle = map(trueRx[1], 0, 1010, ESCMin, MaxWave);
+  if(throttle < ESCMin) throttle = ESCMin;
+}
+
 void flightControl() {
-  // Control the throttle with the right side
-  throttle = map(trueRx[1], 0, 1010, 150, 245);
-  if(throttle < 145) throttle = 145;
-
-//  if(RightToggle) {
-//    double k = double(map(volatileRx[1], 990, 2012, 000, 200)) / 1000.0;
-//    if(k < 0) k = .00;
-//    printt = k;
-//    pitchRatePID.changeConstants(k, 0.0, 0.0);
-//    rollRatePID.changeConstants (k, 0.0, 0.0);
-//  }
-//  else 
-//    throttle = map(volatileRx[1], 990, 2012, 150, 245);
-//  if(throttle < 145) throttle = 145;
-//  
-//  throttle = 195;
-
-  timePassed = MicrosPassed * 0.000001;
-  
-  if (positionMode == true){
-    int X = map(trueRx[3], -500, 500, -15, 15);
-    int Y = map(trueRx[2], -500, 500, -15, 15);
-    rollin  = pitchPositionPID.Compute(roll  - (double)X, timePassed, xdps);
-    pitchin = rollPositionPID.Compute (pitch - (double)Y, timePassed, ydps);
+  float timePassed = MicrosPassed * 0.000001;
+ 
+  if(RightToggle) {
+    setX=-map(trueRx[2], -1000, 1000, -40, 40);
+    setY=-map(trueRx[3], -1000, 1000, -40, 40);
+    
+    float perror = pitch - (float)setY;
+    float rerror = roll  - (float)setX;
+    
+    setX=(int)rangle.Compute(rerror, timePassed, dps[0], 20.0);
+    setY=(int)pangle.Compute(perror, timePassed, dps[1], 20.0);
   }
-  else {
-    rollin  = double(map(trueRx[2], -500, 500, -45, 45));
-    pitchin = double(map(trueRx[3], -500, 500, -45, 45));
-  }
-
-  int rollPID  = (int)pitchRatePID.Compute(xdps - rollin,  timePassed);
-  int pitchPID = (int)rollRatePID.Compute (ydps - pitchin, timePassed);
-  
-  speeds[0] = throttle + rollPID;
-  speeds[1] = throttle - rollPID;
-  speeds[2] = throttle + pitchPID;
-  speeds[3] = throttle - pitchPID;
-  
-  // Implement speed limits
-  for(int x=0; x<4; x++) {
-    speeds[x] = constrain(speeds[x], MinWave, MaxWave);
+  else{
+    setX=map(trueRx[2], -1000, 1000, -40*3, 40*3);
+    setY=map(trueRx[3], -1000, 1000, -40*3, 40*3);
   }
   
-  analogWrite(East,  speeds[0]);
-  analogWrite(West,  speeds[1]);
-  analogWrite(North, speeds[2]);
-  analogWrite(South, speeds[3]);
+  setZ=map(trueRx[0], -1000, 1000, -150, 150);
+  
+  int rollPID  = (int)rrate.Compute(dps[0] + (float)setX, timePassed, 0);
+  int pitchPID = (int)prate.Compute(dps[1] + (float)setY, timePassed, 0);
+  int yawPID   = (int)yrate.Compute(dps[2] + (float)setZ, timePassed, 0);
+  
+  implementSpeeds(rollPID, pitchPID, yawPID);
 }
+
+void implementSpeeds(int RollPID, int PitchPID, int YawPID) {
+  int array[4];
+  array[0] = throttle - RollPID  - YawPID;  // East 
+  array[1] = throttle + RollPID  - YawPID;  // West 
+  array[2] = throttle - PitchPID + YawPID;  // North
+  array[3] = throttle + PitchPID + YawPID;  // South
+  
+  int diff = 0;
+  for(int x=0; x<4; x++) {
+    if((array[x] - MaxWave) > diff) {
+      diff = array[x] - MaxWave;
+    }
+  }
+  
+  for(int x=0; x<4; x++) {
+    array[x] -= diff;
+    if(array[x] < MinWave)
+      array[x] = MinWave;
+  }
+  
+  analogWrite(East,  array[0]);
+  analogWrite(West,  array[1]);
+  analogWrite(North, array[2]);
+  analogWrite(South, array[3]);
+}
+
+//void inCtrl() {
+//  rollin  = -2 * map(trueRx[2], -505, 505, -15, 15);
+//  pitchin = -2 * map(trueRx[3], -505, 505, -15, 15);
+//}

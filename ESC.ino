@@ -1,10 +1,3 @@
-int StopPoints;                              // Points are incremented whenever a pivot point is reached 
-const int StopTarget = 4;                    // Points needed to stop the quadcopter
-unsigned long StopTracker;                   // Keeps track of the time interval between pivots
-const int MilliStopperTime = 500;            // Maximum time in milliseconds alotted for pivots
-int PivotSpeedThreshold = 200;               // Speed that needs to be reached to define a pivot
-boolean StopBegun = false;                   // Indicates whether the pivot sequence has been initiated
-int lastPivot;                               // Contains the last zdps value of the sequence while it still exists
 
 void setupMotors() {
   pinMode(North, OUTPUT);
@@ -33,19 +26,29 @@ void testDrive() {
   analogWrite(East,  stickinput);
 }
 
-
 void triggerSTOP() {
-  if(!LeftToggle) {STOP = true;}
+  
+  if(!LeftToggle) STOP = true;
+  if(!controllerOn) STOP = true;
+  
+  static int StopPoints;                       // Points are incremented whenever a pivot point is reached 
+  const int StopTarget = 4;                    // Points needed to stop the quadcopter
+  static unsigned long StopTracker;            // Keeps track of the time interval between pivots
+  const int MilliStopperTime = 500;            // Maximum time in milliseconds alotted for pivots before reset
+  const int PivotSpeedThreshold = 200;         // Speed that needs to be reached to define a pivot
+  static boolean StopBegun = false;            // Indicates whether the pivot sequence has been initiated
+  static int lastPivot;                        // Contains the last zdps value of the sequence while it still exists
+  
   if(StopPoints == StopTarget) {STOP = true;}
-  if((zdps >= PivotSpeedThreshold || zdps <= -1 * PivotSpeedThreshold) && !StopBegun) {
+  if((dps[2] >= PivotSpeedThreshold || dps[2] <= -1 * PivotSpeedThreshold) && !StopBegun) {
     StopTracker = millis();
-    lastPivot = zdps;
+    lastPivot = dps[2];
     StopBegun = true;
     StopPoints = 1;
   }
-  if((StopBegun && millis() - StopTracker < MilliStopperTime) && ((lastPivot < 0 && zdps > PivotSpeedThreshold) || (lastPivot > 0 && zdps < -1 * PivotSpeedThreshold))) {
+  if((StopBegun && millis() - StopTracker < MilliStopperTime) && ((lastPivot < 0 && dps[2] > PivotSpeedThreshold) || (lastPivot > 0 && dps[2] < -1 * PivotSpeedThreshold))) {
     StopPoints++;
-    lastPivot = zdps;
+    lastPivot = dps[2];
     StopTracker = millis();
   }
   if(StopBegun && millis() - StopTracker >= MilliStopperTime) {

@@ -1,91 +1,117 @@
+#include <SMAFilter.h>
+#include <IMU10DOF.h>
 #include <PIDCont.h>
 #include <Wire.h>
 #include "Config.h"
 
+SMAFilter accelFilter, gyroFilter, magFilter;
+IMU10DOF IMU;
+PIDCont rangle, pangle, rrate, prate, yrate; 
+
+void initFilters() {
+  accelFilter.init(20);
+  gyroFilter.init(10);
+}
+
+// PID gains
+//float aP = 0.2;
+//float aD = 0.063; //79
+//float aI = 0.67;
+float aP = 0.67;
+float aD = 0.0; //79
+float aI = 0.07;
+float ainthresh = 40.0;
+float aoutthresh = 10.0;
+
+//float rP = 0.25;
+//float rD = 0.0; //79
+//float rI = 0.0950;
+float rP = 0.25;
+float rD = 0.0; //79
+float rI = 0.95;
+float rinthresh  = 100.0;
+float routthresh = 20.0;
+
+float yP = 0.68;
+float yD = 0.0; //79
+float yI = 0.5;
+float yinthresh  = 30.0;
+float youtthresh = 40.0;
+
 void setup() {
-  Wire.begin();
 //  Serial.begin(9600); printing = true;
-  delay(300);                                 // Makes sure that the sensors have been properly initialized
-  initLSM303(SCALE);
-  itgWrite(itgAddress, DLPF_FS, (DLPF_FS_SEL_0|DLPF_FS_SEL_1|DLPF_CFG_1)); //Sets the gyroscope scale for the outputs to +/-2000 degrees per second
-  itgWrite(itgAddress, SMPLRT_DIV, 0);        // Sets the sample rate to 1kHz
-//  ZeroRateLevelCalibration();                // Creates xRo, yRo, zRo
+  initPID();                                  // Creates PID classes and assigns appropriate constants
+  initFilters();
+  IMU.init();
+  delay(700);                                 // Makes sure that the sensors have been properly initialized
+  rinse(100);
+  ZeroRateLevelCalibration(false);            // Creates gyrozero
   setupMotors();                              // Attaches each motor to its appropriate pin and sends them the minimum wave
-  initPID();
-  getAccelValues();                           // Uses the accelerometer to calculate the inital angles before movement
-  getAccelValues();                           // Uses the accelerometer to calculate the inital angles before movement
-  getAccelAngles(ax, ay, az);
-  pitch = thetaY;
-  roll = thetaX;
-  getMagValues();
-  getMagHeading();
-  yaw = heading;
-  yawin = yaw;
   setupReceiverInterrupts();
-  while(millis() < 6000) {
-    calibrateRxLoop();
-    MicrosTracker = micros(); 
-    getGyroValues();                          // Computes Rm for each axis                     
-    logOldDPS();                              // Saves the Dps values from the last loop before they are updated, for the Trapezoidal Rule
-    getGyroDPS(xRm, yRm, zRm);                // Converts Rm values into dps (multiply by SC, threshold filtering)
-    gx = DeltaTrapezoidalRule(xdps1, xdps);
-    gy = DeltaTrapezoidalRule(ydps1, ydps);
-    gz = DeltaTrapezoidalRule(zdps1, zdps);
-    getAccelValues();                         // Computes acceleration and tilt in each axis
-    fax = simpleMovingAverage(ax, axsum, axRm);
-    fay = simpleMovingAverage(ay, aysum, ayRm);
-    faz = simpleMovingAverage(az, azsum, azRm);
-    getAccelAngles(fax, fay, faz);
-    ComplementaryFilter();                    // Low pass filter on the accelerometer, high pass filter on the gyroscope
-    getMagValues();
-    getMagHeading();
-    getYaw();
-    printValues();
-    MicrosPassed = micros() - MicrosTracker;  // Saves the time it took for the loop
-  }
 }
 
 void loop() {  
   MicrosTracker = micros(); 
   calibrateRxLoop();
   getRxValues();
-  getGyroValues();                          // Computes Rm for each axis                     
-  logOldDPS();                              // Saves the DPS values from the last loop before they are updated, for the Trapezoidal Rule
-  getGyroDPS(xRm, yRm, zRm);                // Converts Rm values into dps (multiply by SC, drift compensation)
-  gx = DeltaTrapezoidalRule(xdps1, xdps);
-  gy = DeltaTrapezoidalRule(ydps1, ydps);
-  gz = DeltaTrapezoidalRule(zdps1, zdps);
-  getAccelValues();                         // Computes acceleration in each axis
-  fax = simpleMovingAverage(ax, axsum, axRm);
-  fay = simpleMovingAverage(ay, aysum, ayRm);
-  faz = simpleMovingAverage(az, azsum, azRm);
-  getAccelAngles(fax, fay, faz);
-  ComplementaryFilter();                   
-  getMagValues();
-  getMagHeading();
-  getYaw();
-  ESCFunctions();  
+  
+  int gyro[3];
+  IMU.getGyroValues(gyro);                  // Computes Rm for each axis     
+  float fgyro[3];
+  gyroFilter.filter(gyro, fgyro);
+  copyArray(olddps, dps);                              // Saves the DPS values from the last loop before they are updated, for the Trapezoidal Rule
+  getGyroDPS(fgyro);                        // Converts Rm values into dps (multiply by SC, drift compensation)
+  transform(dps, 0);
+  driftCompensation(dps, gyrozero);
+  for(int i=0;i<3;i++)
+    gtrap[i] = DeltaTrapezoidalRule(olddps[i], dps[i]);
+    
+  int accel[3];
+  IMU.getAccelValues(accel);                         // Computes acceleration in each axis
+  float faccel[3];
+  accelFilter.filter(accel, faccel);
+  transform(faccel, 0);
+  getAccelAngles(faccel);
+  
+  ComplementaryFilter();
+
+  ESC();
+
   printValues();
   MicrosPassed = micros() - MicrosTracker;  // Saves the time it took to run the loop
 }  
-void ESCFunctions() {
-  if(!STOP) {
+
+void ESC() {
+  if(millis() > 6000 && !STOP) {
+    throttleCtrl();
     flightControl();
-//    Hover();
-//    testSimple();
-//    testDrive();
+    analogWrite(East, ESCMin);
+    analogWrite(West, ESCMin);
     triggerSTOP();
   }
-  else {
+  else if(STOP) {
+    rangle.resetI();
+    pangle.resetI();
+    rrate.resetI();
+    prate.resetI();
+    yrate.resetI();
     analogWrite(North, ESCMin);
     analogWrite(West,  ESCMin);
-    analogWrite(South, ESCMin);;
+    analogWrite(South, ESCMin);
     analogWrite(East,  ESCMin);
-    if(LeftToggle) {STOP = false;}
+    if(LeftToggle) STOP = false;
   }
 }
 
-
+void rinse(int time) {
+  int accel[3], gyro[3], mag[3];
+  unsigned long track = millis();
+  while(millis() < track + time) {
+    IMU.getAccelValues(accel);
+    IMU.getGyroValues(gyro);
+    IMU.getMagValues(mag);  
+  }
+}
 
 
 

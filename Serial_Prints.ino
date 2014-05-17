@@ -1,107 +1,75 @@
-unsigned long PrintTracker;
-unsigned int MilliPrintTime = 100; // Time between prints in milliseconds
 
 void printValues() {
+  static unsigned long PrintTracker;
+  const unsigned int MilliPrintTime = 300;  
+  
   if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-//    Serial.print(" xRo:"); Serial.print(printt, DEC);
-    Serial.print(" pitchin:"); Serial.print(pitchin);
-    Serial.print(" rollin:"); Serial.print(rollin);
+    Theta();
     Serial.println();
   }
 }
 
-void CompareRoRm() {
-  Serial.print(" xRo:"); Serial.print(xRo, DEC);
-  Serial.print(" yRo:"); Serial.print(yRo, DEC);
-  Serial.print(" zRo:"); Serial.print(zRo, DEC);
-  Serial.print(" xRm:"); Serial.print(xRm);
-  Serial.print(" yRm:"); Serial.print(yRm);
-  Serial.print(" zRm:"); Serial.print(zRm);
+void MicrosLoop() {
+  Serial.print(" microsloop: "); Serial.print(MicrosPassed); Serial.print("\t");
 }
 
-void RxValues() {
-  for(int x=0; x<4; x++) {
-    Serial.print(trueRx[x]);
-    Serial.print("\t\t"); 
-  }
+void RPin() {
+  Serial.print(" pitchin: "); Serial.print(pitchin); Serial.print("\t");
+  Serial.print(" rollin: ") ; Serial.print(rollin) ; Serial.print("\t"); 
 }
 
-void motorValues() {
-  for(int x=0; x<4; x++) {
-    Serial.print(speeds[x]);
-    Serial.print("\t\t"); 
-  }
+void Tune() {
+  Serial.print(" tune: "); Serial.print(tune, DEC); Serial.print("\t");
 }
 
-void IntegratedGyroValues() {
-  Serial.print(" GyroPitch:"); Serial.print(gy);
-  Serial.print(" GyroRoll:"); Serial.print(gx);
-  Serial.print(" GyroYaw:"); Serial.print(gz);
+void RC() {
+  Serial.print(" 1: "); Serial.print(trueRx[0]); Serial.print("\t");
+  Serial.print(" 2: "); Serial.print(trueRx[1]); Serial.print("\t"); 
+  Serial.print(" 3: "); Serial.print(trueRx[2]); Serial.print("\t");
+  Serial.print(" 4: "); Serial.print(trueRx[3]); Serial.print("\t");
+  Serial.print(" Left: "); Serial.print(LeftToggle); Serial.print("\t");  
+  Serial.print(" Right: "); Serial.print(RightToggle); Serial.print("\t");
 }
 
-void MilliLoopTime() {
-  Serial.print(" LoopTime:"); Serial.print(LoopTime);
+void Volatile() {
+  Serial.print(" 1: "); Serial.print(volatileRx[0]); Serial.print("\t");
+  Serial.print(" 2: "); Serial.print(volatileRx[1]); Serial.print("\t"); 
+  Serial.print(" 3: "); Serial.print(volatileRx[2]); Serial.print("\t");
+  Serial.print(" 4: "); Serial.print(volatileRx[3]); Serial.print("\t");
+  Serial.print(" 5: "); Serial.print(volatileRx[4]); Serial.print("\t");  
+  Serial.print(" 6: "); Serial.print(volatileRx[5]); Serial.print("\t");
 }
 
-void LevelAccelTilts() {
-  Serial.print(" LevelPitch:"); Serial.print(LevelPitch);
-  Serial.print(" LevelRoll:"); Serial.print(LevelRoll);
-}
-
-//void PIDSerovOutputs() {
-//  Serial.print(" NwT:"); Serial.print(NwT);
-//  Serial.print(" SwT:"); Serial.print(SwT);
-//  Serial.print(" SeT:"); Serial.print(SeT);
-//  Serial.print(" NeT:"); Serial.print(NeT);
-//}
-
-void DPS() {
-  Serial.print(" xdps:"); Serial.print(xdps);
-  Serial.print(" ydps:"); Serial.print(ydps);
-  Serial.print(" zdps:"); Serial.print(zdps);
-  //Serial.print(" R:"); Serial.print(Reduced);
-}
-
-void PitchRoll() {
-  Serial.print(" pitch:"); Serial.print(pitch);
-  Serial.print(" roll:"); Serial.print(roll);
-}
-
-void MATLABGraph() {
-  Serial.print("       "); Serial.print(thetaX);
-  Serial.print("       "); Serial.print(0);
-  Serial.print("       "); Serial.print(0);
-  Serial.print("       "); Serial.print(millis());
-}
-
-  
-void Accel() {
-  Serial.print(" ax:"); Serial.print(ax);
-  Serial.print(" ay:"); Serial.print(ay);
-  Serial.print(" az:"); Serial.print(az);
-}
-
-void AccelandGyro() {
-  Serial.print("  gx:"); Serial.print(gx);
-  Serial.print("  thetaX:"); Serial.print(thetaX);
-  Serial.print("  gy:"); Serial.print(gy);
-  Serial.print("  thetaY:"); Serial.print(thetaY);
-  Serial.print("  gz:"); Serial.print(gz);
-  Serial.print("  thetaZ:"); Serial.print(thetaZ);
-  Serial.print(" pitch:"); Serial.print(pitch);
-  Serial.print("     roll:"); Serial.print(roll);
+void RollPitch() {
+  Serial.print(" roll: ") ; Serial.print(roll) ; Serial.print("\t"); 
+  Serial.print(" pitch: "); Serial.print(pitch); Serial.print("\t");
 }
 
 void Theta() {
-  Serial.print(" thetaX:"); Serial.print(thetaX);
-  Serial.print(" thetaY:"); Serial.print(thetaY);
-  Serial.print(" thetaZ:"); Serial.print(thetaZ);
+  Serial.print(" thetaX: "); Serial.print(theta[0]); Serial.print("\t");
+  Serial.print(" thetaY: "); Serial.print(theta[1]); Serial.print("\t"); 
+  Serial.print(" thetaZ: "); Serial.print(theta[2]); Serial.print("\t");
 }
 
-//void pidvalues() {
-//  Serial.print(" pitch:"); Serial.print(pitch);
-//  Serial.print("     NSComplement:"); Serial.print(NSComplement);
-//  Serial.print("     roll:"); Serial.print(roll);
-//  Serial.print("     WEComplement:"); Serial.print(WEComplement);
-//}
+void Dps() {
+  Serial.print(" dpsX: "); Serial.print(dps[0], DEC); Serial.print("\t");
+  Serial.print(" dpsY: "); Serial.print(dps[1], DEC); Serial.print("\t");
+  Serial.print(" dpsZ: "); Serial.print(dps[2], DEC); Serial.print("\t");
+}
+
+void Dps2() {
+  Serial.print(" dps2X: "); Serial.print(dps2[0], DEC); Serial.print("\t");
+  Serial.print(" dps2Y: "); Serial.print(dps2[1], DEC); Serial.print("\t");
+  Serial.print(" dps2Z: "); Serial.print(dps2[2], DEC); Serial.print("\t");
+}
+
+void gyroZero() {
+  Serial.print(" gyrozeroX: "); Serial.print(gyrozero[0], DEC);
+  Serial.print(" gyrozeroY: "); Serial.print(gyrozero[1], DEC);  
+  Serial.print(" gyrozeroZ: "); Serial.print(gyrozero[2], DEC);
+}
+
+void Heading() {
+  Serial.print(" heading: "); Serial.print(heading);
+}

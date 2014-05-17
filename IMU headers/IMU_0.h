@@ -29,6 +29,7 @@ const int South = 9;
 const int East  = 8;
 
 // GYROSCOPE
+double SC = 0.069657;                   // Scale factor in dps/LSB
 char WHO_AM_I = 0x00;
 char SMPLRT_DIV= 0x15;
 char DLPF_FS = 0x16;
