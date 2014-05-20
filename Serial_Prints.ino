@@ -5,9 +5,15 @@ void printValues() {
   
   if(millis() >= PrintTracker && printing) {
     PrintTracker = (millis() + MilliPrintTime);
-    Theta();
+    RC();
     Serial.println();
   }
+}
+
+void Set() {
+  Serial.print(" setX: "); Serial.print(setX); Serial.print("\t");
+  Serial.print(" setY: "); Serial.print(setY); Serial.print("\t"); 
+  Serial.print(" setZ: "); Serial.print(setZ); Serial.print("\t");
 }
 
 void MicrosLoop() {
@@ -42,14 +48,14 @@ void Volatile() {
 }
 
 void RollPitch() {
-  Serial.print(" roll: ") ; Serial.print(roll) ; Serial.print("\t"); 
-  Serial.print(" pitch: "); Serial.print(pitch); Serial.print("\t");
+  Serial.print(" roll: ") ; Serial.print(roll, DEC) ; Serial.print("\t"); 
+  Serial.print(" pitch: "); Serial.print(pitch, DEC); Serial.print("\t");
 }
 
 void Theta() {
-  Serial.print(" thetaX: "); Serial.print(theta[0]); Serial.print("\t");
-  Serial.print(" thetaY: "); Serial.print(theta[1]); Serial.print("\t"); 
-  Serial.print(" thetaZ: "); Serial.print(theta[2]); Serial.print("\t");
+  Serial.print(" thetaX: "); Serial.print(theta[0], DEC); Serial.print("\t");
+  Serial.print(" thetaY: "); Serial.print(theta[1], DEC); Serial.print("\t"); 
+  Serial.print(" thetaZ: "); Serial.print(theta[2], DEC); Serial.print("\t");
 }
 
 void Dps() {

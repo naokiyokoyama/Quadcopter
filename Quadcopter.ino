@@ -4,7 +4,7 @@
 #include <Wire.h>
 #include "Config.h"
 
-SMAFilter accelFilter, gyroFilter, magFilter;
+SMAFilter accelFilter, gyroFilter, magFilter, RxFilter;
 IMU10DOF IMU;
 PIDCont rangle, pangle, rrate, prate, yrate; 
 
@@ -14,26 +14,23 @@ void initFilters() {
 }
 
 // PID gains
-//float aP = 0.2;
-//float aD = 0.063; //79
-//float aI = 0.67;
-float aP = 0.67;
-float aD = 0.0; //79
+//float aP = 0.187;
+//float aI = 0.0967;
+//float aD = 0.412;
+float aP = 0.95;
+float aD = 0.25;
 float aI = 0.07;
-float ainthresh = 40.0;
-float aoutthresh = 10.0;
+float ainthresh  = 10.0;
+float aoutthresh = 20.0;
 
-//float rP = 0.25;
-//float rD = 0.0; //79
-//float rI = 0.0950;
 float rP = 0.25;
-float rD = 0.0; //79
+float rD = 0.0;
 float rI = 0.95;
 float rinthresh  = 100.0;
 float routthresh = 20.0;
 
 float yP = 0.68;
-float yD = 0.0; //79
+float yD = 0.0; 
 float yI = 0.5;
 float yinthresh  = 30.0;
 float youtthresh = 40.0;
@@ -85,8 +82,6 @@ void ESC() {
   if(millis() > 6000 && !STOP) {
     throttleCtrl();
     flightControl();
-    analogWrite(East, ESCMin);
-    analogWrite(West, ESCMin);
     triggerSTOP();
   }
   else if(STOP) {

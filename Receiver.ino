@@ -113,14 +113,9 @@ void fallingCh6Signal() {
 }
 
 void getRxValues() {
-  static const int threshold = 30;
-  
   if(calibrated) {
-    for(int x=0; x<4; x++) {
+    for(int x=0; x<4; x++) 
       trueRx[x] = volatileRx[x] - zeroRx[x];
-      if(abs(trueRx[x]) < threshold)
-        trueRx[x] = 0;
-    }
     controllerOn = true;
     if(volatileRx[4] > 1750) LeftToggle = true;
     else if(volatileRx[4] < 1250) LeftToggle = false;

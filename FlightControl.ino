@@ -1,7 +1,6 @@
 
 const int MaxWave = 254;        // Upper speed limit
-const int MinWave = ESCMin;         // Lower speed limi
-// Speed of motor when level
+const int MinWave = ESCMin;         // Lower speed limit
 
 float tune;
 
@@ -33,28 +32,41 @@ void throttleCtrl() {
 
 void flightControl() {
   float timePassed = MicrosPassed * 0.000001;
+  int rollPID, pitchPID, yawPID;
+  setZ = map(trueRx[0], -500, 500, -125, 125);
+  yawPID = (int)yrate.Compute(dps[2] + (float)setZ, timePassed, 0);
+  transformint(trueRx, 2);
  
   if(RightToggle) {
-    setX=-map(trueRx[2], -1000, 1000, -40, 40);
-    setY=-map(trueRx[3], -1000, 1000, -40, 40);
+    setX=-map(trueRx[2], -500, 500, -45, 45);
+    setY=-map(trueRx[3], -500, 500, -45, 45);
     
-    float perror = pitch - (float)setY;
-    float rerror = roll  - (float)setX;
+    float rerror, perror;
+    rerror = roll  - (float)setX;
+    perror = pitch - (float)setY;
     
-    setX=(int)rangle.Compute(rerror, timePassed, dps[0], 20.0);
-    setY=(int)pangle.Compute(perror, timePassed, dps[1], 20.0);
+    float rD, pD;
+    if(abs(rerror) > 2) 
+      rD = 0.087;
+    else
+      rD = aD;
+    if(abs(perror) > 2) 
+      pD = 0.087;
+    else
+      pD = aD;
+      
+    rangle.changeConstants(aP, aI, rD, ainthresh, aoutthresh);
+    pangle.changeConstants(aP, aI, pD, ainthresh, aoutthresh);
+    
+    rollPID  = (int)rangle.Compute(rerror, timePassed, dps[0]);
+    pitchPID = (int)pangle.Compute(perror, timePassed, dps[1]);
   }
-  else{
-    setX=map(trueRx[2], -1000, 1000, -40*3, 40*3);
-    setY=map(trueRx[3], -1000, 1000, -40*3, 40*3);
+  else {
+    setX=map(trueRx[2], -500, 500, -20*3, 20*3);
+    setY=map(trueRx[3], -500, 500, -20*3, 20*3);
+    rollPID  = (int)rrate.Compute(dps[0] + (float)setX, timePassed, 0);
+    pitchPID = (int)prate.Compute(dps[1] + (float)setY, timePassed, 0);
   }
-  
-  setZ=map(trueRx[0], -1000, 1000, -150, 150);
-  
-  int rollPID  = (int)rrate.Compute(dps[0] + (float)setX, timePassed, 0);
-  int pitchPID = (int)prate.Compute(dps[1] + (float)setY, timePassed, 0);
-  int yawPID   = (int)yrate.Compute(dps[2] + (float)setZ, timePassed, 0);
-  
   implementSpeeds(rollPID, pitchPID, yawPID);
 }
 
